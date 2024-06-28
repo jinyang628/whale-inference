@@ -6,7 +6,17 @@ authors = ["jinyang628 <chenjinyang4192@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "3.12.1"
+black = "^24.4.2"
+fastapi = "^0.111.0"
+openai = "^1.34.0"
+python-dotenv = "^1.0.1"
+langchain = "^0.2.5"
+langchain-community = "^0.2.5"
+langchain-openai = "^0.1.9"
+unstructured = {extras = ["md"], version = "^0.14.7"}
+chromadb = "^0.5.3"
+sdk-practice = "^0.1.0"
 
 
 [build-system]
