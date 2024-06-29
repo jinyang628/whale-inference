@@ -44,7 +44,6 @@ class OpenAi(LLMBaseModel):
                 json_response: dict[str, str] = json.loads(response.choices[0].message.function_call.arguments)
                 print("~~~LLM RESPONSE~~~")
                 print(json_response)
-                # TODO: Implement the response processing
             except Exception as e:
                 log.error(f"Error processing response from OpenAI: {str(e)}")
                 raise InferenceFailure("Error processing OpenAI response")
