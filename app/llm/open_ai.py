@@ -6,7 +6,7 @@ import os
 import logging
 from dotenv import load_dotenv
 
-from app.prompts.functions import Functions, get_response_function
+# from app.prompts.functions import Functions, get_response_function
 
 log = logging.getLogger(__name__)
 load_dotenv()
@@ -37,8 +37,8 @@ class OpenAi(LLMBaseModel):
                     {"role": "system", "content": system_message},
                     {"role": "user", "content": user_message},
                 ],
-                tools=[get_response_function()],
-                tool_choice={"name": NotesFunctions.GET_NOTES},
+                # tools=[get_response_function()],
+                # tool_choice={"name": NotesFunctions.GET_NOTES},
             )
             try:
                 json_response: dict[str, str] = json.loads(response.choices[0].message.function_call.arguments)

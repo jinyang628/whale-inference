@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 
 from app.config import InferenceConfig
 from app.generator.response import ResponseGenerator
-from app.models.message import MessageResponse, MessageRequest
+from app.models.inference import InferenceResponse, InferenceRequest
 
 log = logging.getLogger(__name__)
 
@@ -13,14 +13,14 @@ app = FastAPI()
 
 
 @app.post("/inference")
-async def generate_response(input: MessageRequest) -> JSONResponse:
+async def generate_response(input: InferenceRequest) -> JSONResponse:
     try:
         config = InferenceConfig()
         generator = ResponseGenerator(config=config)
-        result: MessageResponse = await generator.generate(
+        result: InferenceResponse = await generator.generate(
+            applications=input.applications,
             message=input.message,
             chat_history=input.chat_history,
-            agent=input.agent,
         )
         return JSONResponse(
             status_code=200,
