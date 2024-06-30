@@ -2,6 +2,9 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 from pydantic import BaseModel
+from app.models.application import ApplicationContent
+
+from app.models.inference import InferenceResponse, SelectionResponse
 
 
 class LLMConfig(BaseModel):
@@ -26,11 +29,22 @@ class LLMBaseModel(ABC):
         self._model_config = model_config
 
     @abstractmethod
-    async def send_message(
+    async def send_http_request_message(
         self,
         system_message: str,
         user_message: str,
-    ) -> str:
+        applications: list[ApplicationContent]
+    ) -> InferenceResponse:
+        """Sends a message to the AI and returns the response."""
+        pass
+    
+    @abstractmethod
+    async def send_selection_message(
+        self,
+        system_message: str,
+        user_message: str,
+        applications: list[ApplicationContent]
+    ) -> SelectionResponse:
         """Sends a message to the AI and returns the response."""
         pass
 
