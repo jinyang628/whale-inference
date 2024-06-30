@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
@@ -7,7 +8,7 @@ from app.config import InferenceConfig
 from app.generator.selection import SelectionGenerator
 from app.generator.http_request import HttpRequestGenerator
 from app.llm.model import LLMType
-from app.models.inference import SelectionResponse, InferenceResponse, InferenceRequest
+from app.models.inference import HttpMethodResponse, SelectionResponse, InferenceResponse, InferenceRequest
 
 log = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ async def generate_response(input: InferenceRequest) -> JSONResponse:
         )
         http_request_generator = HttpRequestGenerator(config=HTTP_REQUEST_CONFIG)
         print("SELECTION COMPLETE")
-        inference_response_lst: list[InferenceResponse] = await http_request_generator.generate(
+        http_method_response_lst: list[HttpMethodResponse] = await http_request_generator.generate(
             applications=input.applications,
             message=input.message,
             chat_history=input.chat_history,
@@ -40,11 +41,12 @@ async def generate_response(input: InferenceRequest) -> JSONResponse:
         )
         print("INFERENCE COMPLETE")
         # TODO: Need some calibration step that checks for duplicate in the filter conditons/updated data/inserted_row + whether all the NECESSARY parameters of the HTTP request are filled out + INVALID parameters are kept empty 
-        inference_response_lst_dump = [inference_response.model_dump() for inference_response in inference_response_lst]
-        print(inference_response_lst_dump)
+        inference_response = InferenceResponse(
+            response=http_method_response_lst,
+        )
         return JSONResponse(    
             status_code=200,
-            content=inference_response_lst_dump,
+            content=inference_response.model_dump(),
         )
     except Exception as e:
         log.error(f"Error in generating response: {e}")

@@ -31,9 +31,12 @@ class HttpMethodRequest(BaseModel):
     filter_conditions: dict[str, Any]
     
 # TODO: Consider splitting this up instead of jumbling all the response shape tgt under one class (but need think about what schema it will be when we return to backend)
-class InferenceResponse(BaseModel):
+class HttpMethodResponse(BaseModel):
     http_method: HttpMethod
     inserted_row: Optional[dict[str, Any]] = None
     filter_conditions: Optional[list[dict[str, Any]]] = None
     updated_data: Optional[list[dict[str, Any]]] = None
+    
+class InferenceResponse(BaseModel):
+    response: list[HttpMethodResponse]
     

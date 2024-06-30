@@ -6,7 +6,7 @@ import os
 import logging
 from dotenv import load_dotenv
 from app.models.application import ApplicationContent, Table
-from app.models.inference import HttpMethod, InferenceResponse, SelectionResponse
+from app.models.inference import HttpMethod, HttpMethodResponse, InferenceResponse, SelectionResponse
 
 from app.prompts.functions import HttpMethodFunctions, SelectionFunctions, get_http_method_parameters_function, get_selection_function
 
@@ -65,7 +65,7 @@ class OpenAi(LLMBaseModel):
         user_message: str,
         http_method: HttpMethod,
         table: Table
-    ) -> str:
+    ) -> HttpMethodResponse:
         log.info(f"Sending http method message to OpenAI")
         try:
             response = self._client.chat.completions.create(
@@ -87,9 +87,9 @@ class OpenAi(LLMBaseModel):
             print("initial response")
             print(json_response)
             json_response["http_method"] = http_method
-            inference_response = InferenceResponse.model_validate(json_response)
-            print(inference_response)
-            return inference_response
+            http_method_response = HttpMethodResponse.model_validate(json_response)
+            print(http_method_response)
+            return http_method_response
         except Exception as e:
             log.error(f"Error sending or processing http method message to OpenAI: {str(e)}")
             raise InferenceFailure("Error sending or processing http method message to OpenAI")

@@ -1,7 +1,7 @@
 from app.generator.base import Generator
 from app.llm.model import LLMType
 from app.models.application import Table
-from app.models.inference import ApplicationContent, HttpMethod, InferenceResponse, SelectionResponse
+from app.models.inference import ApplicationContent, HttpMethod, HttpMethodResponse, InferenceResponse, SelectionResponse
 from app.models.message import Message
 from app.prompts.http_request.open_ai import (
     generate_openai_http_request_system_message,
@@ -55,8 +55,8 @@ class HttpRequestGenerator(Generator):
         message: str, 
         chat_history: list[Message],
         selection_response: SelectionResponse
-    ) -> list[InferenceResponse]:
-        response_list = []
+    ) -> list[HttpMethodResponse]:
+        response_list: list[HttpMethodResponse] = []
         for grouping in selection_response.relevant_groupings:
             application_name = grouping.application_name
             table_name = grouping.table_name
@@ -77,7 +77,7 @@ class HttpRequestGenerator(Generator):
             )
             
             try:
-                response: InferenceResponse = await self._model.send_http_request_message(
+                response: HttpMethodResponse = await self._model.send_http_request_message(
                     system_message=system_message,
                     user_message=user_message,
                     http_method=http_method,

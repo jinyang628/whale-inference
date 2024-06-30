@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pydantic import BaseModel
 from app.models.application import ApplicationContent, Table
 
-from app.models.inference import HttpMethod, InferenceResponse, SelectionResponse
+from app.models.inference import HttpMethod, HttpMethodResponse, InferenceResponse, SelectionResponse
 
 
 class LLMConfig(BaseModel):
@@ -35,7 +35,7 @@ class LLMBaseModel(ABC):
         user_message: str,
         http_method: HttpMethod,
         table: Table
-    ) -> InferenceResponse:
+    ) -> HttpMethodResponse:
         """Sends a message to the AI and returns the response."""
         pass
     
