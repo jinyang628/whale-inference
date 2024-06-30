@@ -2,9 +2,9 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 from pydantic import BaseModel
-from app.models.application import ApplicationContent
+from app.models.application import ApplicationContent, Table
 
-from app.models.inference import InferenceResponse, SelectionResponse
+from app.models.inference import HttpMethod, InferenceResponse, SelectionResponse
 
 
 class LLMConfig(BaseModel):
@@ -33,7 +33,8 @@ class LLMBaseModel(ABC):
         self,
         system_message: str,
         user_message: str,
-        applications: list[ApplicationContent]
+        http_method: HttpMethod,
+        table: Table
     ) -> InferenceResponse:
         """Sends a message to the AI and returns the response."""
         pass

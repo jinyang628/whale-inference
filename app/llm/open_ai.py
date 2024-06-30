@@ -5,8 +5,8 @@ from openai import OpenAI
 import os
 import logging
 from dotenv import load_dotenv
-from app.models.application import ApplicationContent
-from app.models.inference import SelectionResponse
+from app.models.application import ApplicationContent, Table
+from app.models.inference import HttpMethod, InferenceResponse, SelectionResponse
 
 from app.prompts.functions import HttpMethodFunctions, SelectionFunctions, get_http_method_parameters_function, get_selection_function
 
@@ -25,6 +25,8 @@ class OpenAi(LLMBaseModel):
             api_key=OPENAI_API_KEY,
         )
         
+    # TODO: Ensure that the order of the pairs are correct. Sometimes order matters. E.g. PUT -> GET
+    # TODO: Consider splitting the selction step of tables separately. Currently: (Application, Table Name, HTTP Method) -> To consider: (Application, HTTP Method) + (Table Name)
     async def send_selection_message(
         self,
         system_message: str,
@@ -50,6 +52,7 @@ class OpenAi(LLMBaseModel):
             tool_call = response.choices[0].message.tool_calls[0]
             json_response: dict[str, str] = json.loads(tool_call.function.arguments)
             selection_response = SelectionResponse.model_validate(json_response)
+            print(selection_response)
             return selection_response
         except Exception as e:
             log.error(f"Error sending or processing selection message to OpenAI: {str(e)}")
@@ -60,9 +63,10 @@ class OpenAi(LLMBaseModel):
         self,
         system_message: str,
         user_message: str,
-        applications: list[ApplicationContent]
+        http_method: HttpMethod,
+        table: Table
     ) -> str:
-        log.info(f"Sending http meethod message to OpenAI")
+        log.info(f"Sending http method message to OpenAI")
         try:
             response = self._client.chat.completions.create(
                 model=self._model_name,
@@ -70,7 +74,7 @@ class OpenAi(LLMBaseModel):
                     {"role": "system", "content": system_message},
                     {"role": "user", "content": user_message},
                 ],
-                tools=[get_http_method_parameters_function(applications=applications)],
+                tools=[get_http_method_parameters_function(http_method=http_method, table=table)],
                 tool_choice={
                     "type": "function",
                     "function": {
@@ -80,9 +84,12 @@ class OpenAi(LLMBaseModel):
             )
             tool_call = response.choices[0].message.tool_calls[0]
             json_response: dict[str, str] = json.loads(tool_call.function.arguments)
-            print("~~~LLM RESPONSE~~~")
+            print("initial response")
             print(json_response)
-            return json.dumps(json_response)
+            json_response["http_method"] = http_method
+            inference_response = InferenceResponse.model_validate(json_response)
+            print(inference_response)
+            return inference_response
         except Exception as e:
             log.error(f"Error sending or processing http method message to OpenAI: {str(e)}")
             raise InferenceFailure("Error sending or processing http method message to OpenAI")

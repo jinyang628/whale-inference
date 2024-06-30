@@ -30,17 +30,21 @@ async def generate_response(input: InferenceRequest) -> JSONResponse:
             message=input.message,
             chat_history=input.chat_history,
         )
-        
         http_request_generator = HttpRequestGenerator(config=HTTP_REQUEST_CONFIG)
-        result: InferenceResponse = await http_request_generator.generate(
+        print("SELECTION COMPLETE")
+        inference_response_lst: list[InferenceResponse] = await http_request_generator.generate(
             applications=input.applications,
             message=input.message,
             chat_history=input.chat_history,
             selection_response=selection_response,
         )
-        return JSONResponse(
+        print("INFERENCE COMPLETE")
+        # TODO: Need some calibration step that checks for duplicate in the filter conditons/updated data/inserted_row + whether all the NECESSARY parameters of the HTTP request are filled out + INVALID parameters are kept empty 
+        inference_response_lst_dump = [inference_response.model_dump() for inference_response in inference_response_lst]
+        print(inference_response_lst_dump)
+        return JSONResponse(    
             status_code=200,
-            content=result.model_dump(),
+            content=inference_response_lst_dump,
         )
     except Exception as e:
         log.error(f"Error in generating response: {e}")
