@@ -80,6 +80,7 @@ class HttpRequestGenerator(Generator):
                 response: HttpMethodResponse = await self._model.send_http_request_message(
                     system_message=system_message,
                     user_message=user_message,
+                    application=application,
                     http_method=http_method,
                     table=table
                 )

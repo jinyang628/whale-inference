@@ -33,6 +33,7 @@ class LLMBaseModel(ABC):
         self,
         system_message: str,
         user_message: str,
+        application: ApplicationContent,
         http_method: HttpMethod,
         table: Table
     ) -> HttpMethodResponse:

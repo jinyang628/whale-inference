@@ -33,6 +33,8 @@ class HttpMethodRequest(BaseModel):
 # TODO: Consider splitting this up instead of jumbling all the response shape tgt under one class (but need think about what schema it will be when we return to backend)
 class HttpMethodResponse(BaseModel):
     http_method: HttpMethod
+    application: ApplicationContent
+    table_name: str
     inserted_row: Optional[dict[str, Any]] = None
     filter_conditions: Optional[list[dict[str, Any]]] = None
     updated_data: Optional[list[dict[str, Any]]] = None

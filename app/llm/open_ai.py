@@ -63,6 +63,7 @@ class OpenAi(LLMBaseModel):
         self,
         system_message: str,
         user_message: str,
+        application: ApplicationContent,
         http_method: HttpMethod,
         table: Table
     ) -> HttpMethodResponse:
@@ -87,6 +88,8 @@ class OpenAi(LLMBaseModel):
             print("initial response")
             print(json_response)
             json_response["http_method"] = http_method
+            json_response["application"] = application.model_dump()
+            json_response["table_name"] = table.name
             http_method_response = HttpMethodResponse.model_validate(json_response)
             print(http_method_response)
             return http_method_response
