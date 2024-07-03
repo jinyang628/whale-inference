@@ -50,7 +50,6 @@ async def generate_response(input: InferenceRequest) -> JSONResponse:
             input=http_method_response_lst,
             original_applications=input.applications,
         )
-        print(input.applications)
         print(inference_response)
         print("POST PROCESS COMPLETE")
         
