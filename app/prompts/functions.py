@@ -60,7 +60,7 @@ class HttpMethodFunctions(StrEnum):
     HTTP_METHOD = "http_method"
     APPLICATION_NAME = "application_name"
     UPDATED_DATA = "updated_data"
-    INSERTED_ROW = "inserted_row"
+    INSERTED_ROWS = "inserted_rows"
     TARGET_ROW = "target_row"
     COLUMN_NAME = "column_name"
     COLUMN_VALUE = "column_value"
@@ -90,24 +90,27 @@ def _get_post_http_method_parameters_function(columns: list[Column]) -> dict[str
             "parameters": {
                 "type": "object",
                 "properties": {
-                    HttpMethodFunctions.INSERTED_ROW: {
-                        "type": "object",
-                        "properties": {
-                            column.name: {
-                                "type": ["string", "number", "boolean", "null"],
-                                "description": f"The value for the {column.name} column in the inserted row. Make sure that the value is of the same type as the column's data type."
-                            } for column in columns
-                        },
-                        "required": [column.name for column in columns if not column.nullable]
+                    HttpMethodFunctions.INSERTED_ROWS: {
+                        "type": "array",
+                        "description": "A list of rows to be inserted",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                column.name: {
+                                    "type": ["string", "number", "boolean", "null"],
+                                    "description": f"The value for the {column.name} column in the inserted row. Make sure that the value is of the same type as the column's data type."
+                                } for column in columns
+                            },
+                            "required": [column.name for column in columns if not column.nullable]
+                        }
                     }
                 },
-                "required": [HttpMethodFunctions.INSERTED_ROW]
+                "required": [HttpMethodFunctions.INSERTED_ROWS]
             }
         }
     }
     
     return function
-
 
 def _get_delete_http_method_parameters_function(columns: list[Column]) -> dict[str, Any]:
     function = {
