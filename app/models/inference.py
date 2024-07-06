@@ -18,6 +18,7 @@ class InferenceRequest(BaseModel):
     chat_history: list[Message]
 
 class SelectedGrouping(BaseModel):
+    task: str
     application_name: str
     table_name: str
     http_method: HttpMethod

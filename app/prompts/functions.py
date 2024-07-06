@@ -6,6 +6,7 @@ from app.models.inference import HttpMethod
 
 class SelectionFunctions(StrEnum):
     SELECT = "select"
+    TASK = "task"
     APPLICATION_NAME = "application_name"
     TABLE_NAME = "table_name"
     HTTP_METHOD = "http_method"
@@ -19,16 +20,20 @@ def get_selection_function(
         "type": "function",
         "function": {
             "name": SelectionFunctions.SELECT,
-            "description": "Select the relevant (application, table name, HTTP method) groupings that are necessary to perform the user's instruction.",
+            "description": "Select the relevant (task, application, table name, HTTP method) groupings that are necessary to perform the user's instruction.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     SelectionFunctions.RELEVANT_GROUPINGS: {
                         "type": "array",
-                        "description": "All the relevant (application, table name, HTTP method) groupings.",
+                        "description": "All the relevant (task, application, table name, HTTP method) groupings.",
                         "items": {
                             "type": "object",
                             "properties": {
+                                SelectionFunctions.TASK: {
+                                    "type": "string",
+                                    "description": "This task represents a single step in the entire user instruction."
+                                },
                                 SelectionFunctions.APPLICATION_NAME: {
                                     "type": "string",
                                     "enum": [application.name for application in applications],
@@ -44,7 +49,7 @@ def get_selection_function(
                                     "description": "The HTTP method to use on the chosen application's table",
                                 }
                             },
-                            "required": [SelectionFunctions.APPLICATION_NAME, SelectionFunctions.TABLE_NAME, SelectionFunctions.HTTP_METHOD]
+                            "required": [SelectionFunctions.TASK, SelectionFunctions.APPLICATION_NAME, SelectionFunctions.TABLE_NAME, SelectionFunctions.HTTP_METHOD]
                         }
                     }
                 }
