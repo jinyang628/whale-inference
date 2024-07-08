@@ -1,8 +1,11 @@
 from pydantic import BaseModel
+import logging
 from app.models.application import Column, PrimaryKey
 
 from app.models.inference import InferenceRequest
 
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
 
 class Preprocessor(BaseModel):
     def preprocess(self, input: InferenceRequest) -> InferenceRequest:
@@ -16,7 +19,7 @@ def _drop_id_column(input: InferenceRequest):
             updated_table_columns: list[Column] = []
             for column in table.columns:
                 if column.primary_key == PrimaryKey.AUTO_INCREMENT:
-                    print(f"{column.name} column dropped from {table.name} table in {application.name} application")
+                    log.info(f"{column.name} column dropped from {table.name} table in {application.name} application")
                     continue
                 updated_table_columns.append(column)
             table.columns = updated_table_columns

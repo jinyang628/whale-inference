@@ -10,7 +10,9 @@ from app.models.inference import HttpMethod, HttpMethodResponse, InferenceRespon
 
 from app.prompts.functions import HttpMethodFunctions, SelectionFunctions, get_http_method_parameters_function, get_selection_function
 
+logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
+
 load_dotenv()
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
@@ -52,7 +54,7 @@ class OpenAi(LLMBaseModel):
             tool_call = response.choices[0].message.tool_calls[0]
             json_response: dict[str, str] = json.loads(tool_call.function.arguments)
             selection_response = SelectionResponse.model_validate(json_response)
-            print(selection_response)
+            log.info(selection_response)
             return selection_response
         except Exception as e:
             log.error(f"Error sending or processing selection message to OpenAI: {str(e)}")
@@ -85,13 +87,13 @@ class OpenAi(LLMBaseModel):
             )
             tool_call = response.choices[0].message.tool_calls[0]
             json_response: dict[str, str] = json.loads(tool_call.function.arguments)
-            print("initial response")
-            print(json_response)
+            log.info("initial response")
+            log.info(json_response)
             json_response["http_method"] = http_method
             json_response["application"] = application.model_dump()
             json_response["table_name"] = table.name
             http_method_response = HttpMethodResponse.model_validate(json_response)
-            print(http_method_response)
+            log.info(http_method_response)
             return http_method_response
         except Exception as e:
             log.error(f"Error sending or processing http method message to OpenAI: {str(e)}")

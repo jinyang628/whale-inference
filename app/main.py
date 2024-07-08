@@ -11,6 +11,7 @@ from app.models.inference import HttpMethodResponse, SelectionResponse, Inferenc
 from app.processor.postprocess import Postprocessor
 from app.processor.preprocess import Preprocessor
 
+logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 app = FastAPI()
@@ -27,7 +28,7 @@ HTTP_REQUEST_CONFIG = InferenceConfig(
 async def generate_response(input: InferenceRequest) -> JSONResponse:
     try:
         processed_input = Preprocessor().preprocess(input=input)
-        print("PREPROCESS COMPLETE")
+        log.info("PREPROCESS COMPLETE")
 
         selection_generator = SelectionGenerator(config=SELECTION_CONFIG)
         selection_response: SelectionResponse = await selection_generator.generate(
@@ -35,7 +36,7 @@ async def generate_response(input: InferenceRequest) -> JSONResponse:
             message=processed_input.message,
             chat_history=processed_input.chat_history,
         )
-        print("SELECTION COMPLETE")
+        log.info("SELECTION COMPLETE")
 
         http_request_generator = HttpRequestGenerator(config=HTTP_REQUEST_CONFIG)
         http_method_response_lst: list[HttpMethodResponse] = await http_request_generator.generate(
@@ -44,14 +45,14 @@ async def generate_response(input: InferenceRequest) -> JSONResponse:
             chat_history=processed_input.chat_history,
             selection_response=selection_response,
         )
-        print("HTTP REQUEST COMPLETE")
+        log.info("HTTP REQUEST COMPLETE")
 
         inference_response: InferenceResponse = Postprocessor().postprocess(
             input=http_method_response_lst,
             original_applications=input.applications,
         )
-        print(inference_response)
-        print("POST PROCESS COMPLETE")
+        log.info(inference_response)
+        log.info("POST PROCESS COMPLETE")
         
         
         return JSONResponse(    

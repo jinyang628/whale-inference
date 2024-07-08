@@ -62,7 +62,7 @@ class HttpRequestGenerator(Generator):
             table_name = grouping.table_name
             http_method = grouping.http_method
             
-            print(f"Application: {application_name}, Table: {table_name}, HTTP Method: {http_method}")
+            log.info(f"Application: {application_name}, Table: {table_name}, HTTP Method: {http_method}")
             
             application: ApplicationContent = next((app for app in applications if app.name == application_name))
             table: Table = next((table for table in application.tables if table.name == table_name))
