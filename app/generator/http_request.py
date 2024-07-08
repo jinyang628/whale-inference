@@ -2,6 +2,7 @@ from app.generator.base import Generator
 from app.llm.model import LLMType
 from app.models.application import Table
 from app.models.inference import ApplicationContent, HttpMethod, HttpMethodResponse, InferenceResponse, SelectionResponse
+import asyncio
 from app.models.message import Message
 from app.prompts.http_request.open_ai import (
     generate_openai_http_request_system_message,
@@ -56,8 +57,7 @@ class HttpRequestGenerator(Generator):
         chat_history: list[Message],
         selection_response: SelectionResponse
     ) -> list[HttpMethodResponse]:
-        response_list: list[HttpMethodResponse] = []
-        for grouping in selection_response.relevant_groupings:
+        async def process_grouping(grouping) -> HttpMethodResponse:
             application_name = grouping.application_name
             table_name = grouping.table_name
             http_method = grouping.http_method
@@ -84,8 +84,21 @@ class HttpRequestGenerator(Generator):
                     http_method=http_method,
                     table=table
                 )
-                response_list.append(response)
+                return response
             except Exception as e:
                 log.error(f"Error in generating response: {e}")
                 raise e
+
+        tasks = [process_grouping(grouping) for grouping in selection_response.relevant_groupings]
+        response_list: list[HttpMethodResponse] = []
+
+        # Use asyncio.gather to run all tasks concurrently
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        # Process results in the order of input
+        for result in results:
+            if isinstance(result, Exception):
+                raise result
+            response_list.append(result)
+
         return response_list
