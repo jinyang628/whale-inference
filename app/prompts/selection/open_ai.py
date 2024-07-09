@@ -11,7 +11,7 @@ Follow these guidelines:
     3. For each task, it might involve requests to multiple applications and you need to decide which subset of applications the task is related to.
     4. For each application, you need to determine the subset of tables which the task is related to.
     5. For each table, you need to determine the appropriate HTTP methods to use given the task.  
-    6. The chat history is given to provide more context, but you only have to generate the relevant groupings based on the user's current instruction. 
+    6. The chat history is provided as additional context for you to interpret the user's current instruction, but you only have to generate the relevant groupings based on the user's current instruction. 
 """
 
 def generate_openai_selection_user_message(

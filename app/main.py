@@ -55,7 +55,6 @@ async def generate_response(input: InferenceRequest) -> JSONResponse:
         log.info(inference_response)
         log.info("POST PROCESS COMPLETE")
         
-        
         return JSONResponse(    
             status_code=200,
             content=inference_response.model_dump(),
