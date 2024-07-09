@@ -37,6 +37,8 @@ class OpenAi(LLMBaseModel):
     ) -> SelectionResponse:
         log.info(f"Sending selection message to OpenAI")
         try:
+            log.info(system_message)
+            log.info(user_message)
             response = self._client.chat.completions.create(
                 model=self._model_name,
                 messages=[

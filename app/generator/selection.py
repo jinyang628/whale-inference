@@ -1,3 +1,4 @@
+from app.exceptions.exception import InferenceFailure
 from app.generator.base import Generator
 from app.llm.model import LLMType
 from app.models.inference import ApplicationContent, SelectionResponse
@@ -62,6 +63,9 @@ class SelectionGenerator(Generator):
                 applications=applications
             )
             return response
+        except InferenceFailure as e:
+            log.error(f"Inference failure at selection step: {e}")
+            raise e
         except Exception as e:
             log.error(f"Error in generating response: {e}")
             raise e

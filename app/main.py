@@ -4,6 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
 from app.config import InferenceConfig
+from app.exceptions.exception import InferenceFailure
 from app.generator.selection import SelectionGenerator
 from app.generator.http_request import HttpRequestGenerator
 from app.llm.model import LLMType
@@ -59,6 +60,9 @@ async def generate_response(input: InferenceRequest) -> JSONResponse:
             status_code=200,
             content=inference_response.model_dump(),
         )
+    except InferenceFailure as e:
+        log.error(f"Inference failure: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
-        log.error(f"Error in generating response: {e}")
+        log.error(f"Unknown error in generating response: {e}")
         raise HTTPException(status_code=500, detail=str(e))
