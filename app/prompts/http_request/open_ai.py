@@ -28,6 +28,7 @@ def _generate_openai_post_request_system_message() -> str:
 Follow these guidelines:
     1. You must provide the necessary parameters for the {HttpMethod.POST} request based on the table's schema.
     2. Ensure that the value you provide for each table column follows the data type specified.
+    3. If a particular parameter is not stated in the user's instruction, output the default value for that parameter as specified in the table's schema.
 """
 
 # TODO: Some of the put requests is not a simple replacement but an increment/decrease of the current value (Should we introduce a new field that triggers that in the schema? Or should this be a multi-step process that involves going back to backend?)
