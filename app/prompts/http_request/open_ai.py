@@ -1,4 +1,4 @@
-from app.models.application import ApplicationContent, Table
+from app.models.application import Table
 from app.models.inference import HttpMethod
 from app.models.message import Message
 
