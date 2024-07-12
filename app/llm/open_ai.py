@@ -6,7 +6,7 @@ import os
 import logging
 from dotenv import load_dotenv
 from app.models.application import ApplicationContent, Table
-from app.models.inference import HttpMethod, HttpMethodResponse, InferenceResponse, SelectionResponse
+from app.models.inference import HttpMethod, HttpMethodResponse, SelectionResponse
 
 from app.prompts.functions import HttpMethodFunctions, SelectionFunctions, get_http_method_parameters_function, get_selection_function
 
@@ -91,6 +91,7 @@ class OpenAi(LLMBaseModel):
             json_response: dict[str, str] = json.loads(tool_call.function.arguments)
             log.info("initial response")
             log.info(json_response)
+            
             json_response["http_method"] = http_method
             json_response["application"] = application.model_dump()
             json_response["table_name"] = table.name

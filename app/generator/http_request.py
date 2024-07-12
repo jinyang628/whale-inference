@@ -1,7 +1,7 @@
 from app.generator.base import Generator
 from app.llm.model import LLMType
 from app.models.application import Table
-from app.models.inference import ApplicationContent, HttpMethod, HttpMethodResponse, InferenceResponse, SelectionResponse
+from app.models.inference import ApplicationContent, HttpMethod, HttpMethodResponse, SelectionResponse
 import asyncio
 from app.models.message import Message
 from app.prompts.http_request.open_ai import (
@@ -10,6 +10,7 @@ from app.prompts.http_request.open_ai import (
 )
 import logging
 
+logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 class HttpRequestGenerator(Generator):
