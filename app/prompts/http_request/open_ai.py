@@ -3,7 +3,7 @@ from app.models.inference import HttpMethod
 from app.models.message import Message
 
 
-def generate_openai_http_request_system_message(http_method: HttpMethod) -> str:    
+def generate_openai_http_request_system_message(http_method: HttpMethod) -> str:
     match http_method:
         case HttpMethod.GET:
             return _generate_openai_get_request_system_message()
@@ -13,14 +13,16 @@ def generate_openai_http_request_system_message(http_method: HttpMethod) -> str:
             return _generate_openai_put_request_system_message()
         case HttpMethod.DELETE:
             return _generate_openai_delete_request_system_message()
-        
+
+
 def _generate_openai_get_request_system_message() -> str:
     return f"""Your task is to interpret a user's natural language instruction and supply the necessary parameters for an ORM to initiate a {HttpMethod.GET} request to the specified table in the application. 
 
 Follow these guidelines:
-    1. You might have to provide some filter conditions for the {HttpMethod.GET} request based on the table's schema and the user's instruction.
+    1. You might have to provide some filter conditions for the {HttpMethod.GET} request based on the table's schema and the user's instruction. Be careful not to get confused between the table name and the column name as they might be the same.
     3. Ensure that the value you provide for the filter condition(s) follows the data type specified for the column.
 """
+
 
 def _generate_openai_post_request_system_message() -> str:
     return f"""Your task is to interpret a user's natural language instruction and supply the necessary parameters for an ORM to initiate a {HttpMethod.POST} request to the specified table in the application. 
@@ -31,6 +33,7 @@ Follow these guidelines:
     3. If a particular parameter is not stated in the user's instruction, output the default value for that parameter as specified in the table's schema.
 """
 
+
 # TODO: Some of the put requests is not a simple replacement but an increment/decrease of the current value (Should we introduce a new field that triggers that in the schema? Or should this be a multi-step process that involves going back to backend?)
 def _generate_openai_put_request_system_message() -> str:
     return f"""Your task is to interpret a user's natural language instruction and supply the necessary parameters for an ORM to initiate a {HttpMethod.PUT} request to the specified table in the application. 
@@ -40,6 +43,7 @@ Follow these guidelines:
     2. You must provide the necessary columnn values to update for the {HttpMethod.PUT} request based on the table's schema and the user's instruction.
     3. Ensure that the value you provide for each table column follows the data type specified.
 """
+
 
 def _generate_openai_delete_request_system_message() -> str:
     return f"""Your task is to interpret a user's natural language instruction and supply the necessary parameters for an ORM to initiate a {HttpMethod.DELETE} request to the specified table in the application. 
@@ -55,8 +59,8 @@ def generate_openai_http_request_user_message(
     table: Table,
     http_method: HttpMethod,
     message: str,
-    chat_history: list[Message]
-) -> str:    
+    chat_history: list[Message],
+) -> str:
     return f"""### Name of application: {application_name}
 
 ### Target table to generate {http_method} request for: 
