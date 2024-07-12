@@ -18,7 +18,7 @@ def _drop_id_column(input: InferenceRequest):
         for table in application.tables:
             updated_table_columns: list[Column] = []
             for column in table.columns:
-                if column.primary_key == PrimaryKey.AUTO_INCREMENT:
+                if column.primary_key != PrimaryKey.NONE:
                     log.info(f"{column.name} column dropped from {table.name} table in {application.name} application")
                     continue
                 updated_table_columns.append(column)
