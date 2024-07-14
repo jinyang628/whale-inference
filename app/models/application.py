@@ -10,6 +10,7 @@ class DataType(StrEnum):
     DATE = "date"
     DATETIME = "datetime"
     UUID = "uuid"
+    ENUM = "enum"
 
 class PrimaryKey(StrEnum):
     NONE = "none" 
@@ -24,7 +25,7 @@ class ForeignKey(BaseModel):
 class Column(BaseModel):
     name: str
     data_type: DataType
-    primary_key: PrimaryKey = PrimaryKey.NONE
+    enum_values: Optional[list[Any]] = None
     nullable: bool = False
     default_value: Optional[Any] = None
     unique: Optional[bool] = False
@@ -37,34 +38,29 @@ class Column(BaseModel):
         if not isinstance(data, dict):
             raise ValueError("Column data must be a dictionary.")
         
-        cls._validate_primary_key(data)
+        cls._validate_enum_values(data)
         cls._set_default_value(data)
         
         return data
     
+    
     @staticmethod
-    def _validate_primary_key(data: dict) -> None:
-        if "primary_key" not in data:
-            return
-        
-        match data["primary_key"]:
-            case PrimaryKey.AUTO_INCREMENT:
-                data["data_type"] = DataType.INTEGER
-                data["nullable"] = False
-                data["default_value"] = 0
-                data["unique"] = True
-                data["foreign_key"] = None
-            case PrimaryKey.UUID:
-                data["data_type"] = DataType.STRING
-                data["nullable"] = False
-                data["default_value"] = ""
-                data["unique"] = True
-                data["foreign_key"] = None
-            case PrimaryKey.NONE:
-                pass
-            case _:
-                raise ValueError(f"Invalid primary key type: {data['primary_key']}")
-            
+    def _validate_enum_values(data: dict) -> None:
+        if data.get('data_type') == DataType.ENUM:
+            if data.get("enum_values") is None:
+                raise ValueError("enum_values must be set for columns with data type 'enum'.")
+            if not data.get("enum_values"):
+                raise ValueError("enum_values cannot be empty.")
+            if len(data.get("enum_values")) != len(set(data.get("enum_values"))):
+                raise ValueError("enum_values must be unique.")
+            if not all(isinstance(value, type(data.get("enum_values")[0])) for value in data.get("enum_values")):
+                raise ValueError("All enum_values must have the same type as the first enum value.")
+            if data.get('default_value') not in data.get("enum_values"):
+                raise ValueError("default_value must be one of the enum_values.")
+        else:
+            if data.get("enum_values"):
+                raise ValueError("enum_values can only be set for columns with data type 'enum'.")
+     
     @staticmethod
     def _set_default_value(data: dict) -> None:
         # If the default value is set, use it
@@ -108,13 +104,6 @@ class Table(BaseModel):
         super().__init__(**data)
         # self._validate_primary_key() # Disable for inference if not preprocessing will throw error
         self._validate_name()
-
-    def _validate_primary_key(self):
-        primary_key_columns = [
-            col for col in self.columns if col.primary_key != PrimaryKey.NONE
-        ]
-        if len(primary_key_columns) != 1:
-            raise ValueError("Exactly one column must be set as primary key.")
 
     def _validate_name(self):
         if not self.name: 
