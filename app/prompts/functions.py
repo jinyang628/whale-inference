@@ -103,7 +103,7 @@ def _get_post_http_method_parameters_function(columns: list[Column]) -> dict[str
                             "properties": {
                                 column.name: {
                                     "type": ["string", "number", "boolean", "null"],
-                                    "description": f"The value for the {column.name} column in the inserted row. Make sure that the value is of the same type as the column's data type. Datetime values should be in the format of YYYY-MM-DDTHH:MM:SS.SSSZ. Date values should be in the format of YYYY-MM-DD."
+                                    "description": f"The value for the {column.name} column in the inserted row. Make sure that the value is of the same type as the column's data type. Datetime values should be in the format of YYYY-MM-DDTHH:MM:SS.SSSZ. Date values should be in the format of YYYY-MM-DD. Use the column's default_value if unsure"
                                 } for column in columns
                             },
                             "required": [column.name for column in columns if not column.nullable]
