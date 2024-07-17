@@ -28,7 +28,7 @@ class OpenAi(LLMBaseModel):
         )
         
     # TODO: Ensure that the order of the pairs are correct. Sometimes order matters. E.g. PUT -> GET
-    # TODO: Consider splitting the selction step of tables separately. Currently: (Application, Table Name, HTTP Method) -> To consider: (Application, HTTP Method) + (Table Name)
+    # TODO: Consider splitting the selection step of tables separately. Currently: (Application, Table Name, HTTP Method) -> To consider: (Application, HTTP Method) + (Table Name). This allows us to use enums for the function calling schema for table name.
     async def send_selection_message(
         self,
         system_message: str,

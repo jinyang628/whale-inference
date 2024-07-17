@@ -1,8 +1,11 @@
 from enum import StrEnum
 from typing import Any
-
-from app.models.application import ApplicationContent, Column, Table
+import logging
+from app.models.application import ApplicationContent, Column, DataType, Table
 from app.models.inference import HttpMethod
+
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
 
 class SelectionFunctions(StrEnum):
     SELECT = "select"
@@ -100,12 +103,7 @@ def _get_post_http_method_parameters_function(columns: list[Column]) -> dict[str
                         "description": "A list of rows to be inserted",
                         "items": {
                             "type": "object",
-                            "properties": {
-                                column.name: {
-                                    "type": ["string", "number", "boolean", "null"],
-                                    "description": f"The value for the {column.name} column in the inserted row. Make sure that the value is of the same type as the column's data type. Datetime values should be in the format of YYYY-MM-DDTHH:MM:SS.SSSZ. Date values should be in the format of YYYY-MM-DD. Use the column's default_value if unsure"
-                                } for column in columns
-                            },
+                            "properties": _build_inserted_rows_schema(columns=columns),
                             "required": [column.name for column in columns if not column.nullable]
                         }
                     }
@@ -114,8 +112,41 @@ def _get_post_http_method_parameters_function(columns: list[Column]) -> dict[str
             }
         }
     }
-    
+    log.info(f"Post HTTP Method Parameters Function: {function}")
     return function
+
+def _build_inserted_rows_schema(columns: list[Column]) -> dict[str, Any]:
+    inserted_rows_schema: dict[str, Any] = {}
+    for column in columns:
+        name: str = column.name
+        data_type: DataType = column.data_type
+        if data_type == DataType.ENUM:
+            # Note for PostgreSQL, enum types are strings
+            inserted_rows_schema[name] = {
+                "type": "string",
+                "enum": column.enum_values,
+                "description": f"The value for the {name} column in the inserted row. Make sure that the value is one of the enum values for the column."
+            }
+        elif data_type == DataType.DATE:
+            # Date objects are not JSON serialisable across API requests so this is the best alternative
+            inserted_rows_schema[name] = {
+                "type": "string",
+                "description": f"The value for the {name} column in the inserted row. Make sure that the value is in the format of YYYY-MM-DD."
+            }
+        elif data_type == DataType.FLOAT:
+            # Floats are called numbers in OpenAI function calling schema
+            inserted_rows_schema[name] = {
+                "type": "number",
+                "description": f"The value for the {name} column in the inserted row."
+            }
+        else:
+            # The rest of the data types do not need special mapping
+            inserted_rows_schema[name] = {
+                "type": data_type,
+                "description": f"The value for the {name} column in the inserted row."
+            }
+    
+    return inserted_rows_schema
 
 def _get_delete_http_method_parameters_function(columns: list[Column]) -> dict[str, Any]:
     function = {

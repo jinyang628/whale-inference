@@ -1,7 +1,7 @@
 from app.generator.base import Generator
 from app.llm.model import LLMType
 from app.models.application import Table
-from app.models.inference import ApplicationContent, HttpMethod, HttpMethodResponse, SelectionResponse
+from app.models.inference import ApplicationContent, HttpMethod, HttpMethodResponse, SelectedGrouping, SelectionResponse
 import asyncio
 from app.models.message import Message
 from app.prompts.http_request.open_ai import (
@@ -58,7 +58,8 @@ class HttpRequestGenerator(Generator):
         chat_history: list[Message],
         selection_response: SelectionResponse
     ) -> list[HttpMethodResponse]:
-        async def process_grouping(grouping) -> HttpMethodResponse:
+        
+        async def process_grouping(grouping: SelectedGrouping) -> HttpMethodResponse:
             application_name = grouping.application_name
             table_name = grouping.table_name
             http_method = grouping.http_method
