@@ -89,8 +89,7 @@ class OpenAi(LLMBaseModel):
             )
             tool_call = response.choices[0].message.tool_calls[0]
             json_response: dict[str, str] = json.loads(tool_call.function.arguments)
-            log.info("initial response")
-            log.info(json_response)
+            log.info(f"Initial response: {json_response}")
             
             json_response["http_method"] = http_method
             json_response["application"] = application.model_dump()
