@@ -100,6 +100,7 @@ class Table(BaseModel):
     name: str
     description: Optional[str] = None
     columns: list[Column]
+    primary_key: PrimaryKey
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -119,6 +120,7 @@ class Table(BaseModel):
 class ApplicationContent(BaseModel):
     name: str
     tables: list[Table]
+
     
     class Config: 
         extra = "forbid"

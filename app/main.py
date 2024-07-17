@@ -30,6 +30,7 @@ async def generate_response(input: InferenceRequest) -> JSONResponse:
     try:
         processed_input = Preprocessor().preprocess(input=input)
         log.info("PREPROCESS COMPLETE")
+        log.info(processed_input)
 
         selection_generator = SelectionGenerator(config=SELECTION_CONFIG)
         selection_response: SelectionResponse = await selection_generator.generate(
