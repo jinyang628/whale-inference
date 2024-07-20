@@ -66,7 +66,6 @@ class OpenAi(LLMBaseModel):
             log.error(f"Error sending or processing selection message to OpenAI: {str(e)}")
             raise InferenceFailure("Error sending or processing selection message to OpenAI")
 
-
     async def send_http_request_message(
         self,
         system_message: str,
@@ -94,7 +93,6 @@ class OpenAi(LLMBaseModel):
             tool_call = response.choices[0].message.tool_calls[0]
             json_response: dict[str, str] = json.loads(tool_call.function.arguments)
             log.info(f"Initial HTTP Request Response: {json_response}")
-            
             json_response["http_method"] = http_method
             json_response["application"] = application.model_dump()
             json_response["table_name"] = table.name

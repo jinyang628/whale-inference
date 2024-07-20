@@ -31,7 +31,6 @@ class HttpMethodRequest(BaseModel):
     http_method: HttpMethod
     filter_conditions: dict[str, Any]
     
-# TODO: Consider splitting this up instead of jumbling all the response shape tgt under one class (but need think about what schema it will be when we return to backend)
 class HttpMethodResponse(BaseModel):
     http_method: HttpMethod
     application: ApplicationContent

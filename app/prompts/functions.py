@@ -64,12 +64,10 @@ def get_selection_function(
 
 class HttpMethodFunctions(StrEnum):
     GET_HTTP_METHOD_PARAMETERS = "get_http_method_parameters"
-    HTTP_METHODS = "http_methods"
     HTTP_METHOD = "http_method"
     APPLICATION_NAME = "application_name"
     UPDATED_DATA = "updated_data"
     INSERTED_ROWS = "inserted_rows"
-    TARGET_ROW = "target_row"
     COLUMN = "column"
     BOOLEAN_CLAUSE = "boolean_clause"
     OPERATOR = "operator"
@@ -358,7 +356,7 @@ def _build_rows_schema(columns: list[Column]) -> dict[str, Any]:
             inserted_rows_schema[name] = {
                 "type": "string",
                 "enum": column.enum_values,
-                "description": f"The value for the {name} column in the inserted row. Make sure that the value is one of the enum values for the column."
+                "description": f"The value for the {name} column in the inserted row. Make sure that the value is one of the enum values for the column and is a STRING."
             }
         elif data_type == DataType.DATE:
             # Date objects are not JSON serialisable across API requests so this is the best alternative
