@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pydantic import BaseModel
 from app.models.application import ApplicationContent, Table
 
-from app.models.inference import HttpMethod, HttpMethodResponse, InferenceResponse, SelectionResponse
+from app.models.inference import HttpMethod, HttpMethodResponse, SelectionResponse
 
 
 class LLMConfig(BaseModel):
@@ -47,6 +47,15 @@ class LLMBaseModel(ABC):
         user_message: str,
         applications: list[ApplicationContent]
     ) -> SelectionResponse:
+        """Sends a message to the AI and returns the response."""
+        pass
+    
+    @abstractmethod
+    async def send_clarification_message(
+        self,
+        system_message: str,
+        user_message: str,
+    ) -> str:
         """Sends a message to the AI and returns the response."""
         pass
 

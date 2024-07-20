@@ -7,7 +7,7 @@ from app.llm.open_ai import OpenAi
 
 
 class LLMType(StrEnum):
-    OPENAI_GPT4 = "gpt-4o-2024-05-13"
+    OPENAI_GPT4 = "gpt-4o-mini-2024-07-18"
     OPENAI_GPT3_5 = "gpt-3.5-turbo-0125"
 
     def default_config(self) -> LLMConfig:

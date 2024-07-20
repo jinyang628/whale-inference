@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 
 from app.config import InferenceConfig
 from app.exceptions.exception import InferenceFailure
+from app.generator.clarification import ClarificationGenerator
 from app.generator.selection import SelectionGenerator
 from app.generator.http_request import HttpRequestGenerator
 from app.llm.model import LLMType
@@ -20,6 +21,10 @@ app = FastAPI()
 SELECTION_CONFIG = InferenceConfig(
     llm_type=LLMType.OPENAI_GPT3_5,
 ) 
+
+CLARIFICATION_CONFIG = InferenceConfig(
+    llm_type=LLMType.OPENAI_GPT3_5,
+)
 
 HTTP_REQUEST_CONFIG = InferenceConfig(
     llm_type=LLMType.OPENAI_GPT3_5,
@@ -38,6 +43,21 @@ async def generate_response(input: InferenceRequest) -> JSONResponse:
             message=processed_input.message,
             chat_history=processed_input.chat_history,
         )
+        if not selection_response.relevant_groupings:
+            clarification_generator = ClarificationGenerator(config=CLARIFICATION_CONFIG)
+            clarification_response: str = await clarification_generator.generate(
+                applications=processed_input.applications,
+                message=processed_input.message,
+                chat_history=processed_input.chat_history,
+            )
+            inference_response = InferenceResponse(
+                response=[],
+                clarification=clarification_response,
+            )
+            return JSONResponse(
+                status_code=200,
+                content=inference_response.model_dump(),
+            )
         log.info("SELECTION COMPLETE")
 
         http_request_generator = HttpRequestGenerator(config=HTTP_REQUEST_CONFIG)

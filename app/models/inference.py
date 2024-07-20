@@ -24,7 +24,7 @@ class SelectedGrouping(BaseModel):
     http_method: HttpMethod
     
 class SelectionResponse(BaseModel):
-    relevant_groupings: list[SelectedGrouping]
+    relevant_groupings: Optional[list[SelectedGrouping]]
     
 class HttpMethodRequest(BaseModel):
     application: ApplicationContent
@@ -42,4 +42,4 @@ class HttpMethodResponse(BaseModel):
     
 class InferenceResponse(BaseModel):
     response: list[HttpMethodResponse]
-    
+    clarification: Optional[str] = None

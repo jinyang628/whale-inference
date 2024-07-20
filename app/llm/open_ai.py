@@ -55,6 +55,10 @@ class OpenAi(LLMBaseModel):
             )
             tool_call = response.choices[0].message.tool_calls[0]
             json_response: dict[str, str] = json.loads(tool_call.function.arguments)
+            log.info(f"Initial Selection Response: {json_response}")
+            if not json_response:
+                json_response = {"relevant_groupings": None}
+
             selection_response = SelectionResponse.model_validate(json_response)
             log.info(selection_response)
             return selection_response
@@ -89,7 +93,7 @@ class OpenAi(LLMBaseModel):
             )
             tool_call = response.choices[0].message.tool_calls[0]
             json_response: dict[str, str] = json.loads(tool_call.function.arguments)
-            log.info(f"Initial response: {json_response}")
+            log.info(f"Initial HTTP Request Response: {json_response}")
             
             json_response["http_method"] = http_method
             json_response["application"] = application.model_dump()
@@ -100,3 +104,24 @@ class OpenAi(LLMBaseModel):
         except Exception as e:
             log.error(f"Error sending or processing http method message to OpenAI: {str(e)}")
             raise InferenceFailure("Error sending or processing http method message to OpenAI")
+
+    async def send_clarification_message(
+        self,
+        system_message: str,
+        user_message: str,
+    ) -> str:
+        log.info(f"Sending clarification message to OpenAI")
+        try:
+            response = self._client.chat.completions.create(
+                model=self._model_name,
+                messages=[
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": user_message},
+                ],
+            )
+            clarification_response: str = response.choices[0].message.content
+            log.info(f"Clarification question: {clarification_response}")
+            return clarification_response
+        except Exception as e:
+            log.error(f"Error sending or processing clarification message to OpenAI: {str(e)}")
+            raise InferenceFailure("Error sending or processing clarification message to OpenAI")
