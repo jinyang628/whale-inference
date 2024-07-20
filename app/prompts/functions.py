@@ -223,7 +223,7 @@ def _get_get_http_method_parameters_function(columns: list[Column]) -> dict[str,
                                                 },
                                                 HttpMethodFunctions.OPERATOR: {
                                                     "type": "string",
-                                                    "enum": ["=", "!=", ">", "<", ">=", "<=", "LIKE", "IN"],
+                                                    "enum": ["=", "!=", ">", "<", ">=", "<=", "LIKE", "IN", "IS NOT"],
                                                     "description": "The comparison operator"
                                                 },
                                                 HttpMethodFunctions.VALUE: {
