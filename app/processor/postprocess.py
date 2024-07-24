@@ -161,7 +161,11 @@ def _enforce_response_types_for_filter_conditions(
         if table.name != input.table_name:
             continue
         table_columns: list[Column] = table.columns
+        # Add id as a possible field to filter by
+        table_columns.append(Column(name="id", data_type=DataType.INTEGER))
+        
         column_name_to_data_type: dict[str, DataType] = {column.name: column.data_type for column in table_columns}
+        
         validated_filter_conditions: dict[str, Any] = {}
         validated_filter_conditions[HttpMethodFunctions.BOOLEAN_CLAUSE] = input.filter_conditions[HttpMethodFunctions.BOOLEAN_CLAUSE]
                 

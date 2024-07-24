@@ -117,6 +117,10 @@ def _get_post_http_method_parameters_function(columns: list[Column]) -> dict[str
     return function
 
 def _get_delete_http_method_parameters_function(columns: list[Column]) -> dict[str, Any]:
+    
+    column_name_enum_lst = [column.name for column in columns]
+    column_name_enum_lst.append("id")
+    
     function = {
         "type": "function",
         "function": {
@@ -143,7 +147,7 @@ def _get_delete_http_method_parameters_function(columns: list[Column]) -> dict[s
                                             "properties": {
                                                 HttpMethodFunctions.COLUMN: {
                                                     "type": "string",
-                                                    "enum": [column.name for column in columns],
+                                                    "enum": column_name_enum_lst,
                                                     "description": "The name of the column to filter on"
                                                 },
                                                 HttpMethodFunctions.OPERATOR: {
@@ -192,6 +196,10 @@ def _get_delete_http_method_parameters_function(columns: list[Column]) -> dict[s
     return function
 
 def _get_get_http_method_parameters_function(columns: list[Column]) -> dict[str, Any]:
+    
+    column_name_enum_lst = [column.name for column in columns]
+    column_name_enum_lst.append("id")
+    
     function = {
         "type": "function",
         "function": {
@@ -218,7 +226,7 @@ def _get_get_http_method_parameters_function(columns: list[Column]) -> dict[str,
                                             "properties": {
                                                 HttpMethodFunctions.COLUMN: {
                                                     "type": "string",
-                                                    "enum": [column.name for column in columns],
+                                                    "enum": column_name_enum_lst,
                                                     "description": "The name of the column to filter on"
                                                 },
                                                 HttpMethodFunctions.OPERATOR: {
@@ -267,6 +275,10 @@ def _get_get_http_method_parameters_function(columns: list[Column]) -> dict[str,
     return function
 
 def _get_put_http_method_parameters_function(columns: list[Column]) -> dict[str, Any]:
+    
+    column_name_enum_lst = [column.name for column in columns]
+    column_name_enum_lst.append("id")
+    
     function = {
         "type": "function",
         "function": {
@@ -293,7 +305,7 @@ def _get_put_http_method_parameters_function(columns: list[Column]) -> dict[str,
                                             "properties": {
                                                 HttpMethodFunctions.COLUMN: {
                                                     "type": "string",
-                                                    "enum": [column.name for column in columns],
+                                                    "enum": column_name_enum_lst,
                                                     "description": "The name of the column to filter on"
                                                 },
                                                 HttpMethodFunctions.OPERATOR: {
