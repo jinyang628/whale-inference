@@ -2,7 +2,7 @@ from typing import Any
 from pydantic import BaseModel
 from app.models.application import ApplicationContent, Column, DataType
 
-from app.models.inference import HttpMethodResponse, InferenceResponse
+from app.models.inference.use import HttpMethodResponse, UseInferenceResponse
 from app.prompts.functions import HttpMethodFunctions
 import logging
 
@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 # TODO: Need some calibrator that checks for duplicate in the filter conditons/updated data/inserted_row + whether all the NECESSARY parameters of the HTTP request are filled out + INVALID parameters are kept empty 
 class Postprocessor(BaseModel):
-    def postprocess(self, input: list[HttpMethodResponse], original_applications: list[ApplicationContent]) -> InferenceResponse:
+    def postprocess(self, input: list[HttpMethodResponse], original_applications: list[ApplicationContent]) -> UseInferenceResponse:
         http_method_response_lst: list[HttpMethodResponse] = []
         for http_method_response in input:
             result = _enforce_response_types(
@@ -24,7 +24,7 @@ class Postprocessor(BaseModel):
             
             http_method_response_lst.append(result)
             
-        return InferenceResponse(
+        return UseInferenceResponse(
             response=http_method_response_lst,
         )
         

@@ -6,7 +6,7 @@ import os
 import logging
 from dotenv import load_dotenv
 from app.models.application import ApplicationContent, Table
-from app.models.inference import HttpMethod, HttpMethodResponse, SelectionResponse
+from app.models.inference.use import HttpMethod, HttpMethodResponse, SelectionResponse
 
 from app.prompts.functions import HttpMethodFunctions, SelectionFunctions, get_http_method_parameters_function, get_selection_function
 

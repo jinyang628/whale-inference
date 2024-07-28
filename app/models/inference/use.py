@@ -12,7 +12,7 @@ class HttpMethod(StrEnum):
     PUT = "PUT"
     DELETE = "DELETE"
     
-class InferenceRequest(BaseModel):
+class UseInferenceRequest(BaseModel):
     applications: list[ApplicationContent]
     message: str
     chat_history: list[Message]
@@ -39,6 +39,6 @@ class HttpMethodResponse(BaseModel):
     filter_conditions: Optional[dict[str, Any]] = None
     updated_data: Optional[dict[str, Any]] = None
     
-class InferenceResponse(BaseModel):
+class UseInferenceResponse(BaseModel):
     response: list[HttpMethodResponse]
     clarification: Optional[str] = None

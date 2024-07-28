@@ -1,7 +1,8 @@
 from app.generator.base import Generator
 from app.llm.model import LLMType
 from app.models.application import Table
-from app.models.inference import ApplicationContent, HttpMethod, HttpMethodResponse, SelectedGrouping, SelectionResponse
+from app.models.application import ApplicationContent
+from app.models.inference.use import HttpMethod, HttpMethodResponse, SelectedGrouping, SelectionResponse
 import asyncio
 from app.models.message import Message
 from app.prompts.http_request.open_ai import (

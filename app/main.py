@@ -9,7 +9,8 @@ from app.generator.clarification import ClarificationGenerator
 from app.generator.selection import SelectionGenerator
 from app.generator.http_request import HttpRequestGenerator
 from app.llm.model import LLMType
-from app.models.inference import HttpMethodResponse, SelectionResponse, InferenceResponse, InferenceRequest
+from app.models.inference.create import CreateInferenceRequest
+from app.models.inference.use import HttpMethodResponse, SelectionResponse, UseInferenceResponse, UseInferenceRequest
 from app.processor.postprocess import Postprocessor
 from app.processor.preprocess import Preprocessor
 
@@ -30,8 +31,8 @@ HTTP_REQUEST_CONFIG = InferenceConfig(
     llm_type=LLMType.OPENAI_GPT3_5,
 )
 
-@app.post("/inference")
-async def generate_response(input: InferenceRequest) -> JSONResponse:
+@app.post("/inference/use")
+async def generate_use_response(input: UseInferenceRequest) -> JSONResponse:
     try:
         processed_input = Preprocessor().preprocess(input=input)
         log.info("PREPROCESS COMPLETE")
@@ -50,7 +51,7 @@ async def generate_response(input: InferenceRequest) -> JSONResponse:
                 message=processed_input.message,
                 chat_history=processed_input.chat_history,
             )
-            inference_response = InferenceResponse(
+            inference_response = UseInferenceResponse(
                 response=[],
                 clarification=clarification_response,
             )
@@ -69,7 +70,7 @@ async def generate_response(input: InferenceRequest) -> JSONResponse:
         )
         log.info("HTTP REQUEST COMPLETE")
 
-        inference_response: InferenceResponse = Postprocessor().postprocess(
+        inference_response: UseInferenceResponse = Postprocessor().postprocess(
             input=http_method_response_lst,
             original_applications=input.applications,
         )
@@ -80,6 +81,17 @@ async def generate_response(input: InferenceRequest) -> JSONResponse:
             status_code=200,
             content=inference_response.model_dump(),
         )
+    except InferenceFailure as e:
+        log.error(f"Inference failure: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        log.error(f"Unknown error in generating response: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/inference/create")
+async def generate_use_response(input: CreateInferenceRequest) -> JSONResponse:
+    try:
+        print(input)
     except InferenceFailure as e:
         log.error(f"Inference failure: {e}")
         raise HTTPException(status_code=500, detail=str(e))

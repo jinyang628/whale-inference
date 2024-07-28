@@ -1,7 +1,7 @@
 from app.exceptions.exception import InferenceFailure
 from app.generator.base import Generator
 from app.llm.model import LLMType
-from app.models.inference import ApplicationContent, SelectionResponse
+from app.models.application import ApplicationContent
 from app.models.message import Message
 from app.prompts.clarification.open_ai import (
     generate_openai_clarification_system_message,

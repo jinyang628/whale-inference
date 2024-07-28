@@ -10,4 +10,4 @@ class Role(StrEnum):
 class Message(BaseModel):
     role: Role
     content: str
-    rows: Optional[list[dict[str, Any]]] = None
+    blocks: Optional[list[dict[str, Any]]] = None

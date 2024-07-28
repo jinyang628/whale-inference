@@ -1,7 +1,8 @@
 from app.exceptions.exception import InferenceFailure
 from app.generator.base import Generator
 from app.llm.model import LLMType
-from app.models.inference import ApplicationContent, SelectionResponse
+from app.models.inference.use import SelectionResponse
+from app.models.application import ApplicationContent
 from app.models.message import Message
 from app.prompts.selection.open_ai import (
     generate_openai_selection_system_message,

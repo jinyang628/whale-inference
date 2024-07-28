@@ -2,7 +2,7 @@ from enum import StrEnum
 from typing import Any
 import logging
 from app.models.application import ApplicationContent, Column, DataType, Table
-from app.models.inference import HttpMethod
+from app.models.inference.use import HttpMethod
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)

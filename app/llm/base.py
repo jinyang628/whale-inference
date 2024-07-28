@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pydantic import BaseModel
 from app.models.application import ApplicationContent, Table
 
-from app.models.inference import HttpMethod, HttpMethodResponse, SelectionResponse
+from app.models.inference.use import HttpMethod, HttpMethodResponse, SelectionResponse
 
 
 class LLMConfig(BaseModel):

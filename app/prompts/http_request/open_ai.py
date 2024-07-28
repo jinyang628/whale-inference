@@ -1,5 +1,5 @@
 from app.models.application import Table
-from app.models.inference import HttpMethod
+from app.models.inference.use import HttpMethod
 from app.models.message import Message
 
 
