@@ -1,33 +1,23 @@
-from app.config import InferenceConfig
-from app.llm.base import LLMBaseModel
-from app.llm.model import LLM, LLMType
-from app.models.inference import ApplicationContent, InferenceResponse
+from app.exceptions.exception import InferenceFailure
+from app.generator.base import Generator
+from app.llm.model import LLMType
+from app.models.application import ApplicationContent
 from app.models.message import Message
-from app.prompts.http_REQUEST.open_ai import (
-    generate_openai_http_method_system_message,
-    generate_openai_http_method_user_message,
+from app.prompts.use.clarification.open_ai import (
+    generate_openai_clarification_system_message,
+    generate_openai_clarification_user_message,
 )
 import logging
 
 log = logging.getLogger(__name__)
 
-class HttpMethodGenerator:
-
-    _llm_type: LLMType
-    _model: LLMBaseModel
-    _max_tokens: int
-
-    def __init__(self, config: InferenceConfig):
-        self._llm_type = config.llm_type
-        self._model = LLM(model_type=self._llm_type).model
-        self._max_tokens = self._model.model_config.max_tokens
-
+class ClarificationGenerator(Generator):
     def generate_system_message(self) -> str:
         match self._llm_type:
             case LLMType.OPENAI_GPT4:
-                return generate_openai_http_method_system_message()
+                return generate_openai_clarification_system_message()
             case LLMType.OPENAI_GPT3_5:
-                return generate_openai_http_method_system_message()
+                return generate_openai_clarification_system_message()
             case _:
                 raise ValueError(f"Unsupported LLM type: {self._llm_type})")
 
@@ -39,13 +29,13 @@ class HttpMethodGenerator:
     ) -> str:
         match self._llm_type:
             case LLMType.OPENAI_GPT4:
-                return generate_openai_http_method_user_message(
+                return generate_openai_clarification_user_message(
                     applications=applications,
                     message=message,
                     chat_history=chat_history
                 )
             case LLMType.OPENAI_GPT3_5:
-                return generate_openai_http_method_user_message(
+                return generate_openai_clarification_user_message(
                     applications=applications,
                     message=message,
                     chat_history=chat_history
@@ -54,8 +44,11 @@ class HttpMethodGenerator:
                 raise ValueError(f"Unsupported LLM type: {self._llm_type})")
 
     async def generate(
-        self, applications: list[ApplicationContent], message: str, chat_history: list[Message]
-    ) -> InferenceResponse:
+        self, 
+        applications: list[ApplicationContent], 
+        message: str, 
+        chat_history: list[Message]
+    ) -> str:
         system_message: str = self.generate_system_message()
         user_message = self.generate_user_message(
             applications=applications, 
@@ -64,12 +57,14 @@ class HttpMethodGenerator:
         )
             
         try:
-            response: InferenceResponse = await self._model.send_http_request_message(
+            response: str = await self._model.send_clarification_message(
                 system_message=system_message,
                 user_message=user_message,
-                applications=applications
             )
             return response
+        except InferenceFailure as e:
+            log.error(f"Inference failure at selection step: {e}")
+            raise e
         except Exception as e:
             log.error(f"Error in generating response: {e}")
             raise e

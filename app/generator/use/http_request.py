@@ -5,7 +5,7 @@ from app.models.application import ApplicationContent
 from app.models.inference.use import HttpMethod, HttpMethodResponse, SelectedGrouping, SelectionResponse
 import asyncio
 from app.models.message import Message
-from app.prompts.http_request.open_ai import (
+from app.prompts.use.http_request.open_ai import (
     generate_openai_http_request_system_message,
     generate_openai_http_request_user_message,
 )

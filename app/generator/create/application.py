@@ -11,13 +11,13 @@ import logging
 
 log = logging.getLogger(__name__)
 
-class ClarificationGenerator(Generator):
+class ApplicationGenerator(Generator):
     def generate_system_message(self) -> str:
         match self._llm_type:
             case LLMType.OPENAI_GPT4:
-                return generate_openai_clarification_system_message()
+                return generate_openai_application_system_message()
             case LLMType.OPENAI_GPT3_5:
-                return generate_openai_clarification_system_message()
+                return generate_openai_application_system_message()
             case _:
                 raise ValueError(f"Unsupported LLM type: {self._llm_type})")
 

@@ -3,12 +3,11 @@ import logging
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
-from app.config import InferenceConfig
+from app.config import APPLICATION_CONFIG, CLARIFICATION_CONFIG, HTTP_REQUEST_CONFIG, SELECTION_CONFIG
 from app.exceptions.exception import InferenceFailure
-from app.generator.clarification import ClarificationGenerator
-from app.generator.selection import SelectionGenerator
-from app.generator.http_request import HttpRequestGenerator
-from app.llm.model import LLMType
+from app.generator.use.clarification import ClarificationGenerator
+from app.generator.use.selection import SelectionGenerator
+from app.generator.use.http_request import HttpRequestGenerator
 from app.models.inference.create import CreateInferenceRequest
 from app.models.inference.use import HttpMethodResponse, SelectionResponse, UseInferenceResponse, UseInferenceRequest
 from app.processor.postprocess import Postprocessor
@@ -18,18 +17,6 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 app = FastAPI()
-
-SELECTION_CONFIG = InferenceConfig(
-    llm_type=LLMType.OPENAI_GPT4,
-) 
-
-CLARIFICATION_CONFIG = InferenceConfig(
-    llm_type=LLMType.OPENAI_GPT4,
-)
-
-HTTP_REQUEST_CONFIG = InferenceConfig(
-    llm_type=LLMType.OPENAI_GPT4,
-)
 
 @app.post("/inference/use")
 async def generate_use_response(input: UseInferenceRequest) -> JSONResponse:
@@ -91,7 +78,11 @@ async def generate_use_response(input: UseInferenceRequest) -> JSONResponse:
 @app.post("/inference/create")
 async def generate_use_response(input: CreateInferenceRequest) -> JSONResponse:
     try:
-        print(input)
+        application_generator = ApplicationGenerator(config=APPLICATION_CONFIG)
+        application_response: ApplicationResponse = await application_generator.generate(
+            message=input.message,
+            chat_history=input.chat_history,
+        )
     except InferenceFailure as e:
         log.error(f"Inference failure: {e}")
         raise HTTPException(status_code=500, detail=str(e))

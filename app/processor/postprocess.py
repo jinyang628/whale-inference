@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from app.models.application import ApplicationContent, Column, DataType
 
 from app.models.inference.use import HttpMethodResponse, UseInferenceResponse
-from app.prompts.functions import HttpMethodFunctions
+from app.prompts.use.functions import HttpMethodFunctions
 import logging
 
 logging.basicConfig(level=logging.INFO)

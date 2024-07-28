@@ -4,7 +4,7 @@ from app.llm.model import LLMType
 from app.models.inference.use import SelectionResponse
 from app.models.application import ApplicationContent
 from app.models.message import Message
-from app.prompts.selection.open_ai import (
+from app.prompts.use.selection.open_ai import (
     generate_openai_selection_system_message,
     generate_openai_selection_user_message,
 )

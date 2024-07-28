@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from app.models.application import ApplicationContent, Table
 from app.models.inference.use import HttpMethod, HttpMethodResponse, SelectionResponse
 
-from app.prompts.functions import HttpMethodFunctions, SelectionFunctions, get_http_method_parameters_function, get_selection_function
+from app.prompts.use.functions import HttpMethodFunctions, SelectionFunctions, get_http_method_parameters_function, get_selection_function
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
