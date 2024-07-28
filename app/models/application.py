@@ -13,7 +13,6 @@ class DataType(StrEnum):
     ENUM = "enum"
 
 class PrimaryKey(StrEnum):
-    NONE = "none" 
     AUTO_INCREMENT = "auto_increment"
     UUID = "uuid"
     

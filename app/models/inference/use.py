@@ -6,6 +6,9 @@ from app.models.application import ApplicationContent
 
 from app.models.message import Message
 
+class UseMessage(Message):
+    rows: Optional[list[dict[str, Any]]] = None
+
 class HttpMethod(StrEnum):
     GET = "GET"
     POST = "POST"
@@ -15,7 +18,7 @@ class HttpMethod(StrEnum):
 class UseInferenceRequest(BaseModel):
     applications: list[ApplicationContent]
     message: str
-    chat_history: list[Message]
+    chat_history: list[UseMessage]
 
 class SelectedGrouping(BaseModel):
     task: str

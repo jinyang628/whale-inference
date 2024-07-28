@@ -1,9 +1,7 @@
 from app.exceptions.exception import InferenceFailure
 from app.generator.base import Generator
 from app.llm.model import LLMType
-from app.models.application import ApplicationContent
-from app.models.inference.create import CreateInferenceResponse
-from app.models.message import Message
+from app.models.inference.create import CreateInferenceResponse, CreateMessage
 from app.prompts.create.application.open_ai import (
     generate_openai_application_system_message,
     generate_openai_application_user_message,
@@ -25,7 +23,7 @@ class ApplicationGenerator(Generator):
     def generate_user_message(
         self, 
         message: str, 
-        chat_history: list[Message]
+        chat_history: list[CreateMessage]
     ) -> str:
         match self._llm_type:
             case LLMType.OPENAI_GPT4:
@@ -44,7 +42,7 @@ class ApplicationGenerator(Generator):
     async def generate(
         self, 
         message: str, 
-        chat_history: list[Message]
+        chat_history: list[CreateMessage]
     ) -> CreateInferenceResponse:
         system_message: str = self.generate_system_message()
         user_message = self.generate_user_message(

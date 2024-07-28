@@ -8,6 +8,7 @@ log = logging.getLogger(__name__)
 
 class ApplicationFunction(StrEnum):
     CREATE_APPLICATION = "create_application"
+    APPLICATION_CONTENT = "application_content"
     NAME = "name"
     OVERVIEW = "overview"
     CLARIFICATION = "clarification"
@@ -26,7 +27,6 @@ class ApplicationFunction(StrEnum):
     COLUMN = "column"
     
     
-    
 def get_application_creation_schema() -> dict[str, Any]:
     function = {
         "type": "function",
@@ -36,77 +36,83 @@ def get_application_creation_schema() -> dict[str, Any]:
             "parameters": {
                 "type": "object",
                 "properties": {
-                    ApplicationFunction.NAME: {
-                        "type": "string",
-                        "description": "The name of the application to be created"
-                    },
-                    ApplicationFunction.TABLES: {
-                        "type": "array",
-                        "description": "An array of tables for the application",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                ApplicationFunction.NAME: {
-                                    "type": "string",
-                                    "description": "The name of the table"
-                                },
-                                ApplicationFunction.DESCRIPTION: {
-                                    "type": "string",
-                                    "description": "A description of the table"
-                                },
-                                ApplicationFunction.COLUMNS: {
-                                    "type": "array",
-                                    "description": "An array of columns for the table",
-                                    "items": {
-                                        "type": "object", 
-                                        "properties": {
-                                            ApplicationFunction.NAME: {
-                                                "type": "string",
-                                                "description": "The name of the column"
-                                            },
-                                            ApplicationFunction.DATA_TYPE: {
-                                                "type": "string",
-                                                "enum": ["string", "integer", "float", "boolean", "date", "datetime", "enum"],
-                                                "description": "The data type of the column"
-                                            },
-                                            ApplicationFunction.ENUM_VALUES: {
-                                                "type": "array",
-                                                "items": {"type": "string"},
-                                                "description": "List of enum values if data_type is enum"
-                                            },
-                                            ApplicationFunction.NULLABLE: {
-                                                "type": "boolean",
-                                                "description": "Whether the column can be null"
-                                            },
-                                            ApplicationFunction.DEFAULT_VALUE: {
-                                                "type": ["string", "number", "boolean", "null"],
-                                                "description": "The default value for the column. This is required if the data type is enum"
-                                            },
-                                            ApplicationFunction.UNIQUE: {
-                                                "type": "boolean",
-                                                "description": "Whether the column values must be unique"
-                                            },
-                                            ApplicationFunction.FOREIGN_KEY: {
-                                                "type": "object",
+                    ApplicationFunction.APPLICATION_CONTENT: {
+                        "type": "object",
+                        "properties": {
+                            ApplicationFunction.NAME: {
+                                "type": "string",
+                                "description": "The name of the application to be created"
+                            },
+                            ApplicationFunction.TABLES: {
+                                "type": "array",
+                                "description": "An array of tables for the application",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        ApplicationFunction.NAME: {
+                                            "type": "string",
+                                            "description": "The name of the table"
+                                        },
+                                        ApplicationFunction.DESCRIPTION: {
+                                            "type": "string",
+                                            "description": "A description of the table"
+                                        },
+                                        ApplicationFunction.COLUMNS: {
+                                            "type": "array",
+                                            "description": "An array of columns for the table",
+                                            "items": {
+                                                "type": "object", 
                                                 "properties": {
-                                                    ApplicationFunction.TABLE: {"type": "string"},
-                                                    ApplicationFunction.COLUMN: {"type": "string"}
+                                                    ApplicationFunction.NAME: {
+                                                        "type": "string",
+                                                        "description": "The name of the column"
+                                                    },
+                                                    ApplicationFunction.DATA_TYPE: {
+                                                        "type": "string",
+                                                        "enum": ["string", "integer", "float", "boolean", "date", "datetime", "uuid", "enum"],
+                                                        "description": "The data type of the column"
+                                                    },
+                                                    ApplicationFunction.ENUM_VALUES: {
+                                                        "type": "array",
+                                                        "items": {"type": "string"},
+                                                        "description": "List of enum values if data_type is enum"
+                                                    },
+                                                    ApplicationFunction.NULLABLE: {
+                                                        "type": "boolean",
+                                                        "description": "Whether the column can be null"
+                                                    },
+                                                    ApplicationFunction.DEFAULT_VALUE: {
+                                                        "type": ["string", "number", "boolean", "null"],
+                                                        "description": "The default value for the column. This is required if the data type is enum"
+                                                    },
+                                                    ApplicationFunction.UNIQUE: {
+                                                        "type": "boolean",
+                                                        "description": "Whether the column values must be unique"
+                                                    },
+                                                    ApplicationFunction.FOREIGN_KEY: {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            ApplicationFunction.TABLE: {"type": "string"},
+                                                            ApplicationFunction.COLUMN: {"type": "string"}
+                                                        },
+                                                        "required": [ApplicationFunction.TABLE, ApplicationFunction.COLUMN],
+                                                        "description": "Foreign key reference if applicable"
+                                                    }
                                                 },
-                                                "required": [ApplicationFunction.TABLE, ApplicationFunction.COLUMN],
-                                                "description": "Foreign key reference if applicable"
+                                                "required": [ApplicationFunction.NAME, ApplicationFunction.DATA_TYPE]
                                             }
                                         },
-                                        "required": [ApplicationFunction.NAME, ApplicationFunction.DATA_TYPE]
-                                    }
-                                },
-                                ApplicationFunction.PRIMARY_KEY: {
-                                    "type": "string",
-                                    "enum": [PrimaryKey.NONE, PrimaryKey.AUTO_INCREMENT, PrimaryKey.UUID],
-                                    "description": "The primary key type for the table"
+                                        ApplicationFunction.PRIMARY_KEY: {
+                                            "type": "string",
+                                            "enum": [PrimaryKey.AUTO_INCREMENT, PrimaryKey.UUID],
+                                            "description": "The primary key type for the table"
+                                        }
+                                    },
+                                    "required": [ApplicationFunction.NAME, ApplicationFunction.COLUMNS, ApplicationFunction.PRIMARY_KEY]
                                 }
-                            },
-                            "required": [ApplicationFunction.TABLE_NAME, ApplicationFunction.COLUMNS, ApplicationFunction.PRIMARY_KEY]
-                        }
+                            }
+                        },
+                        "required": [ApplicationFunction.NAME, ApplicationFunction.TABLES]
                     },
                     ApplicationFunction.OVERVIEW: {
                         "type": "string",

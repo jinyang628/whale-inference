@@ -1,4 +1,4 @@
-from app.models.message import Message
+from app.models.inference.create import CreateMessage
 
 
 def generate_openai_application_system_message() -> str:
@@ -7,7 +7,7 @@ def generate_openai_application_system_message() -> str:
 
 def generate_openai_application_user_message(
     message: str, 
-    chat_history: list[Message]
+    chat_history: list[CreateMessage]
 ) -> str:
     return f"""### Here is the chat history:
 

@@ -1,9 +1,8 @@
 from app.exceptions.exception import InferenceFailure
 from app.generator.base import Generator
 from app.llm.model import LLMType
-from app.models.inference.use import SelectionResponse
+from app.models.inference.use import SelectionResponse, UseMessage
 from app.models.application import ApplicationContent
-from app.models.message import Message
 from app.prompts.use.selection.open_ai import (
     generate_openai_selection_system_message,
     generate_openai_selection_user_message,
@@ -26,7 +25,7 @@ class SelectionGenerator(Generator):
         self, 
         applications: list[ApplicationContent], 
         message: str, 
-        chat_history: list[Message]
+        chat_history: list[UseMessage]
     ) -> str:
         match self._llm_type:
             case LLMType.OPENAI_GPT4:
@@ -48,7 +47,7 @@ class SelectionGenerator(Generator):
         self, 
         applications: list[ApplicationContent], 
         message: str, 
-        chat_history: list[Message]
+        chat_history: list[UseMessage]
     ) -> SelectionResponse:
         system_message: str = self.generate_system_message()
         user_message = self.generate_user_message(

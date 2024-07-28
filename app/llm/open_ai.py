@@ -150,6 +150,11 @@ class OpenAi(LLMBaseModel):
             tool_call = response.choices[0].message.tool_calls[0]
             json_response: dict[str, str] = json.loads(tool_call.function.arguments)
             log.info(f"Initial Application Creation Response: {json_response}")
+            
+            # Ensure that the application name is in the correct format
+            if json_response[ApplicationFunction.APPLICATION_CONTENT] and json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.NAME]:
+                json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.NAME] = json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.NAME].replace(" ", "_").lower()
+                
             response = CreateInferenceResponse.model_validate(json_response)
             log.info(response)
             return response

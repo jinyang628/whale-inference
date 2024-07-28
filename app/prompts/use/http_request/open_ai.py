@@ -1,6 +1,5 @@
 from app.models.application import Table
-from app.models.inference.use import HttpMethod
-from app.models.message import Message
+from app.models.inference.use import HttpMethod, UseMessage
 
 
 def generate_openai_http_request_system_message(http_method: HttpMethod) -> str:
@@ -59,7 +58,7 @@ def generate_openai_http_request_user_message(
     table: Table,
     http_method: HttpMethod,
     message: str,
-    chat_history: list[Message],
+    chat_history: list[UseMessage],
 ) -> str:
     return f"""### Name of application: {application_name}
 

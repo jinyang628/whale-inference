@@ -1,5 +1,5 @@
 from app.models.application import ApplicationContent
-from app.models.message import Message
+from app.models.inference.use import UseMessage
 
 
 def generate_openai_clarification_system_message() -> str:
@@ -8,7 +8,7 @@ def generate_openai_clarification_system_message() -> str:
 def generate_openai_clarification_user_message(
     applications: list[ApplicationContent], 
     message: str, 
-    chat_history: list[Message]
+    chat_history: list[UseMessage]
 ) -> str:
     return f"""### Here are the applications that might be relevant to the user's instruction:
 

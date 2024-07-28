@@ -2,9 +2,8 @@ from app.generator.base import Generator
 from app.llm.model import LLMType
 from app.models.application import Table
 from app.models.application import ApplicationContent
-from app.models.inference.use import HttpMethod, HttpMethodResponse, SelectedGrouping, SelectionResponse
+from app.models.inference.use import HttpMethod, HttpMethodResponse, SelectedGrouping, SelectionResponse, UseMessage
 import asyncio
-from app.models.message import Message
 from app.prompts.use.http_request.open_ai import (
     generate_openai_http_request_system_message,
     generate_openai_http_request_user_message,
@@ -30,7 +29,7 @@ class HttpRequestGenerator(Generator):
         table: Table,
         http_method: HttpMethod,
         message: str, 
-        chat_history: list[Message]
+        chat_history: list[UseMessage]
     ) -> str:
         match self._llm_type:
             case LLMType.OPENAI_GPT4:
@@ -56,7 +55,7 @@ class HttpRequestGenerator(Generator):
         self, 
         applications: list[ApplicationContent], 
         message: str, 
-        chat_history: list[Message],
+        chat_history: list[UseMessage],
         selection_response: SelectionResponse
     ) -> list[HttpMethodResponse]:
         
