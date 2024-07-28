@@ -20,15 +20,15 @@ log = logging.getLogger(__name__)
 app = FastAPI()
 
 SELECTION_CONFIG = InferenceConfig(
-    llm_type=LLMType.OPENAI_GPT3_5,
+    llm_type=LLMType.OPENAI_GPT4,
 ) 
 
 CLARIFICATION_CONFIG = InferenceConfig(
-    llm_type=LLMType.OPENAI_GPT3_5,
+    llm_type=LLMType.OPENAI_GPT4,
 )
 
 HTTP_REQUEST_CONFIG = InferenceConfig(
-    llm_type=LLMType.OPENAI_GPT3_5,
+    llm_type=LLMType.OPENAI_GPT4,
 )
 
 @app.post("/inference/use")
