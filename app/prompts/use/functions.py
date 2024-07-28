@@ -7,7 +7,7 @@ from app.models.inference.use import HttpMethod
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
-class SelectionFunctions(StrEnum):
+class SelectionFunction(StrEnum):
     SELECT = "select"
     TASK = "task"
     APPLICATION_NAME = "application_name"
@@ -22,37 +22,37 @@ def get_selection_function(
     function = {
         "type": "function",
         "function": {
-            "name": SelectionFunctions.SELECT,
+            "name": SelectionFunction.SELECT,
             "description": "Select the relevant (task, application, table name, HTTP method) groupings that are necessary to perform the user's instruction.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    SelectionFunctions.RELEVANT_GROUPINGS: {
+                    SelectionFunction.RELEVANT_GROUPINGS: {
                         "type": "array",
                         "description": "All the relevant (task, application, table name, HTTP method) groupings.",
                         "items": {
                             "type": "object",
                             "properties": {
-                                SelectionFunctions.TASK: {
+                                SelectionFunction.TASK: {
                                     "type": "string",
                                     "description": "This task represents a single step in the entire user instruction."
                                 },
-                                SelectionFunctions.APPLICATION_NAME: {
+                                SelectionFunction.APPLICATION_NAME: {
                                     "type": "string",
                                     "enum": [application.name for application in applications],
                                     "description": "The name of the application to use the HTTP method on."
                                 },
-                                SelectionFunctions.TABLE_NAME: {
+                                SelectionFunction.TABLE_NAME: {
                                     "type": "string",
                                     "description": "The table name of the application to use the HTTP method on.",
                                 },
-                                SelectionFunctions.HTTP_METHOD: {
+                                SelectionFunction.HTTP_METHOD: {
                                     "type": "string",
                                     "enum": [method.value for method in HttpMethod],
                                     "description": "The HTTP method to use on the chosen application's table",
                                 }
                             },
-                            "required": [SelectionFunctions.TASK, SelectionFunctions.APPLICATION_NAME, SelectionFunctions.TABLE_NAME, SelectionFunctions.HTTP_METHOD]
+                            "required": [SelectionFunction.TASK, SelectionFunction.APPLICATION_NAME, SelectionFunction.TABLE_NAME, SelectionFunction.HTTP_METHOD]
                         }
                     }
                 }
@@ -62,7 +62,7 @@ def get_selection_function(
     
     return function
 
-class HttpMethodFunctions(StrEnum):
+class HttpMethodFunction(StrEnum):
     GET_HTTP_METHOD_PARAMETERS = "get_http_method_parameters"
     HTTP_METHOD = "http_method"
     APPLICATION_NAME = "application_name"
@@ -94,12 +94,12 @@ def _get_post_http_method_parameters_function(columns: list[Column]) -> dict[str
     function = {
         "type": "function",
         "function": {
-            "name": HttpMethodFunctions.GET_HTTP_METHOD_PARAMETERS,
+            "name": HttpMethodFunction.GET_HTTP_METHOD_PARAMETERS,
             "description": f"Generate the parameters of the {HttpMethod.POST} request based on the user's instruction and the table's schema",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    HttpMethodFunctions.INSERTED_ROWS: {
+                    HttpMethodFunction.INSERTED_ROWS: {
                         "type": "array",
                         "description": "A list of rows to be inserted",
                         "items": {
@@ -109,7 +109,7 @@ def _get_post_http_method_parameters_function(columns: list[Column]) -> dict[str
                         }
                     }
                 },
-                "required": [HttpMethodFunctions.INSERTED_ROWS]
+                "required": [HttpMethodFunction.INSERTED_ROWS]
             }
         }
     }
@@ -124,38 +124,38 @@ def _get_delete_http_method_parameters_function(columns: list[Column]) -> dict[s
     function = {
         "type": "function",
         "function": {
-            "name": HttpMethodFunctions.GET_HTTP_METHOD_PARAMETERS,
+            "name": HttpMethodFunction.GET_HTTP_METHOD_PARAMETERS,
             "description": f"Generate the parameters of the {HttpMethod.DELETE} request(s) based on the user's instruction and the table's schema",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    HttpMethodFunctions.FILTER_CONDITIONS: {
+                    HttpMethodFunction.FILTER_CONDITIONS: {
                         "type": "object",
                         "description": f"A specification that filters for the rows to delete in the {HttpMethod.DELETE} request",
                         "properties": {
-                            HttpMethodFunctions.BOOLEAN_CLAUSE: {
+                            HttpMethodFunction.BOOLEAN_CLAUSE: {
                                 "type": "string",
                                 "enum": ["AND", "OR"],
                                 "description": "The boolean clause to apply to the conditions"
                             },
-                            HttpMethodFunctions.CONDITIONS: {
+                            HttpMethodFunction.CONDITIONS: {
                                 "type": "array",
                                 "items": {
                                     "oneOf": [
                                         {
                                             "type": "object",
                                             "properties": {
-                                                HttpMethodFunctions.COLUMN: {
+                                                HttpMethodFunction.COLUMN: {
                                                     "type": "string",
                                                     "enum": column_name_enum_lst,
                                                     "description": "The name of the column to filter on"
                                                 },
-                                                HttpMethodFunctions.OPERATOR: {
+                                                HttpMethodFunction.OPERATOR: {
                                                     "type": "string",
                                                     "enum": ["=", "!=", ">", "<", ">=", "<=", "LIKE", "IN"],
                                                     "description": "The comparison operator"
                                                 },
-                                                HttpMethodFunctions.VALUE: {
+                                                HttpMethodFunction.VALUE: {
                                                     "oneOf": [
                                                         {"type": "string"},
                                                         {"type": "number"},
@@ -176,7 +176,7 @@ def _get_delete_http_method_parameters_function(columns: list[Column]) -> dict[s
                                                     "description": "The value to compare against. Use array for IN operator. Make sure the type of the value matches the specified column's data type."
                                                 }
                                             },
-                                            "required": [HttpMethodFunctions.COLUMN, HttpMethodFunctions.OPERATOR, HttpMethodFunctions.VALUE]
+                                            "required": [HttpMethodFunction.COLUMN, HttpMethodFunction.OPERATOR, HttpMethodFunction.VALUE]
                                         },
                                         {
                                             "$ref": "#/properties/HttpMethodFunctions.FILTER_CONDITIONS"
@@ -185,10 +185,10 @@ def _get_delete_http_method_parameters_function(columns: list[Column]) -> dict[s
                                 }
                             }
                         },
-                        "required": [HttpMethodFunctions.BOOLEAN_CLAUSE, HttpMethodFunctions.CONDITIONS]
+                        "required": [HttpMethodFunction.BOOLEAN_CLAUSE, HttpMethodFunction.CONDITIONS]
                     }
                 },
-                "required": [HttpMethodFunctions.FILTER_CONDITIONS]
+                "required": [HttpMethodFunction.FILTER_CONDITIONS]
             }
         }
     }
@@ -203,38 +203,38 @@ def _get_get_http_method_parameters_function(columns: list[Column]) -> dict[str,
     function = {
         "type": "function",
         "function": {
-            "name": HttpMethodFunctions.GET_HTTP_METHOD_PARAMETERS,
+            "name": HttpMethodFunction.GET_HTTP_METHOD_PARAMETERS,
             "description": f"Generate the parameters of the {HttpMethod.GET} request(s) based on the user's instruction and the table's schema",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    HttpMethodFunctions.FILTER_CONDITIONS: {
+                    HttpMethodFunction.FILTER_CONDITIONS: {
                         "type": "object",
                         "description": f"A specification that filters for the rows to delete in the {HttpMethod.GET} request",
                         "properties": {
-                            HttpMethodFunctions.BOOLEAN_CLAUSE: {
+                            HttpMethodFunction.BOOLEAN_CLAUSE: {
                                 "type": "string",
                                 "enum": ["AND", "OR"],
                                 "description": "The boolean clause to apply to the conditions"
                             },
-                            HttpMethodFunctions.CONDITIONS: {
+                            HttpMethodFunction.CONDITIONS: {
                                 "type": "array",
                                 "items": {
                                     "oneOf": [
                                         {
                                             "type": "object",
                                             "properties": {
-                                                HttpMethodFunctions.COLUMN: {
+                                                HttpMethodFunction.COLUMN: {
                                                     "type": "string",
                                                     "enum": column_name_enum_lst,
                                                     "description": "The name of the column to filter on"
                                                 },
-                                                HttpMethodFunctions.OPERATOR: {
+                                                HttpMethodFunction.OPERATOR: {
                                                     "type": "string",
                                                     "enum": ["=", "!=", ">", "<", ">=", "<=", "LIKE", "IN", "IS NOT"],
                                                     "description": "The comparison operator"
                                                 },
-                                                HttpMethodFunctions.VALUE: {
+                                                HttpMethodFunction.VALUE: {
                                                     "oneOf": [
                                                         {"type": "string"},
                                                         {"type": "number"},
@@ -255,7 +255,7 @@ def _get_get_http_method_parameters_function(columns: list[Column]) -> dict[str,
                                                     "description": "The value to compare against. Use array for IN operator. Make sure the type of the value matches the specified column's data type."
                                                 }
                                             },
-                                            "required": [HttpMethodFunctions.COLUMN, HttpMethodFunctions.OPERATOR, HttpMethodFunctions.VALUE]
+                                            "required": [HttpMethodFunction.COLUMN, HttpMethodFunction.OPERATOR, HttpMethodFunction.VALUE]
                                         },
                                         {
                                             "$ref": "#/properties/HttpMethodFunctions.FILTER_CONDITIONS"
@@ -264,10 +264,10 @@ def _get_get_http_method_parameters_function(columns: list[Column]) -> dict[str,
                                 }
                             }
                         },
-                        "required": [HttpMethodFunctions.BOOLEAN_CLAUSE, HttpMethodFunctions.CONDITIONS]
+                        "required": [HttpMethodFunction.BOOLEAN_CLAUSE, HttpMethodFunction.CONDITIONS]
                     }
                 },
-                "required": [HttpMethodFunctions.FILTER_CONDITIONS]
+                "required": [HttpMethodFunction.FILTER_CONDITIONS]
             }
         }
     }
@@ -282,38 +282,38 @@ def _get_put_http_method_parameters_function(columns: list[Column]) -> dict[str,
     function = {
         "type": "function",
         "function": {
-            "name": HttpMethodFunctions.GET_HTTP_METHOD_PARAMETERS,
+            "name": HttpMethodFunction.GET_HTTP_METHOD_PARAMETERS,
             "description": f"Generate the parameters of the {HttpMethod.PUT} request(s) based on the user's instruction and the table's schema",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    HttpMethodFunctions.FILTER_CONDITIONS: {
+                    HttpMethodFunction.FILTER_CONDITIONS: {
                         "type": "object",
                         "description": f"A specification that filters for the rows to delete in the {HttpMethod.PUT} request",
                         "properties": {
-                            HttpMethodFunctions.BOOLEAN_CLAUSE: {
+                            HttpMethodFunction.BOOLEAN_CLAUSE: {
                                 "type": "string",
                                 "enum": ["AND", "OR"],
                                 "description": "The boolean clause to apply to the conditions"
                             },
-                            HttpMethodFunctions.CONDITIONS: {
+                            HttpMethodFunction.CONDITIONS: {
                                 "type": "array",
                                 "items": {
                                     "oneOf": [
                                         {
                                             "type": "object",
                                             "properties": {
-                                                HttpMethodFunctions.COLUMN: {
+                                                HttpMethodFunction.COLUMN: {
                                                     "type": "string",
                                                     "enum": column_name_enum_lst,
                                                     "description": "The name of the column to filter on"
                                                 },
-                                                HttpMethodFunctions.OPERATOR: {
+                                                HttpMethodFunction.OPERATOR: {
                                                     "type": "string",
                                                     "enum": ["=", "!=", ">", "<", ">=", "<=", "LIKE", "IN"],
                                                     "description": "The comparison operator"
                                                 },
-                                                HttpMethodFunctions.VALUE: {
+                                                HttpMethodFunction.VALUE: {
                                                     "oneOf": [
                                                         {"type": "string"},
                                                         {"type": "number"},
@@ -334,7 +334,7 @@ def _get_put_http_method_parameters_function(columns: list[Column]) -> dict[str,
                                                     "description": "The value to compare against. Use array for IN operator. Make sure the type of the value matches the specified column's data type."
                                                 }
                                             },
-                                            "required": [HttpMethodFunctions.COLUMN, HttpMethodFunctions.OPERATOR, HttpMethodFunctions.VALUE]
+                                            "required": [HttpMethodFunction.COLUMN, HttpMethodFunction.OPERATOR, HttpMethodFunction.VALUE]
                                         },
                                         {
                                             "$ref": "#/properties/HttpMethodFunctions.FILTER_CONDITIONS"
@@ -343,15 +343,15 @@ def _get_put_http_method_parameters_function(columns: list[Column]) -> dict[str,
                                 }
                             }
                         },
-                        "required": [HttpMethodFunctions.BOOLEAN_CLAUSE, HttpMethodFunctions.CONDITIONS]
+                        "required": [HttpMethodFunction.BOOLEAN_CLAUSE, HttpMethodFunction.CONDITIONS]
                     },
-                    HttpMethodFunctions.UPDATED_DATA: {
+                    HttpMethodFunction.UPDATED_DATA: {
                         "type": "object",
                         "description": "An object containing the columns to be updated and their new values",
                         "properties": _build_rows_schema(columns=columns),
                     }
                 },
-                "required": [HttpMethodFunctions.FILTER_CONDITIONS, HttpMethodFunctions.UPDATED_DATA]
+                "required": [HttpMethodFunction.FILTER_CONDITIONS, HttpMethodFunction.UPDATED_DATA]
             }
         }
     }

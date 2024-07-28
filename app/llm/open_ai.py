@@ -6,9 +6,11 @@ import os
 import logging
 from dotenv import load_dotenv
 from app.models.application import ApplicationContent, Table
+from app.models.inference.create import CreateInferenceResponse
 from app.models.inference.use import HttpMethod, HttpMethodResponse, SelectionResponse
+from app.prompts.create.functions import ApplicationFunction, get_application_creation_schema
 
-from app.prompts.use.functions import HttpMethodFunctions, SelectionFunctions, get_http_method_parameters_function, get_selection_function
+from app.prompts.use.functions import HttpMethodFunction, SelectionFunction, get_http_method_parameters_function, get_selection_function
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -49,7 +51,7 @@ class OpenAi(LLMBaseModel):
                 tool_choice={
                     "type": "function",
                     "function": {
-                        "name": SelectionFunctions.SELECT
+                        "name": SelectionFunction.SELECT
                     }
                 },
             )
@@ -86,7 +88,7 @@ class OpenAi(LLMBaseModel):
                 tool_choice={
                     "type": "function",
                     "function": {
-                        "name": HttpMethodFunctions.GET_HTTP_METHOD_PARAMETERS
+                        "name": HttpMethodFunction.GET_HTTP_METHOD_PARAMETERS
                     }
                 },
             )
@@ -123,3 +125,35 @@ class OpenAi(LLMBaseModel):
         except Exception as e:
             log.error(f"Error sending or processing clarification message to OpenAI: {str(e)}")
             raise InferenceFailure("Error sending or processing clarification message to OpenAI")
+    
+    async def send_application_message(
+        self,
+        system_message: str,
+        user_message: str,
+    ) -> CreateInferenceResponse:
+        log.info(f"Sending application message to OpenAI")
+        try:
+            response = self._client.chat.completions.create(
+                model=self._model_name,
+                messages=[
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": user_message},
+                ],
+                tools=[get_application_creation_schema()],
+                tool_choice={
+                    "type": "function",
+                    "function": {
+                        "name": ApplicationFunction.CREATE_APPLICATION
+                    }
+                },
+            )
+            tool_call = response.choices[0].message.tool_calls[0]
+            json_response: dict[str, str] = json.loads(tool_call.function.arguments)
+            log.info(f"Initial Application Creation Response: {json_response}")
+            response = CreateInferenceResponse.model_validate(json_response)
+            log.info(response)
+            return response
+        except Exception as e:
+            log.error(f"Error sending or processing application message to OpenAI: {str(e)}")
+            raise InferenceFailure("Error sending or processing application message to OpenAI"
+    )

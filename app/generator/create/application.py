@@ -2,10 +2,11 @@ from app.exceptions.exception import InferenceFailure
 from app.generator.base import Generator
 from app.llm.model import LLMType
 from app.models.application import ApplicationContent
+from app.models.inference.create import CreateInferenceResponse
 from app.models.message import Message
-from app.prompts.clarification.open_ai import (
-    generate_openai_clarification_system_message,
-    generate_openai_clarification_user_message,
+from app.prompts.create.application.open_ai import (
+    generate_openai_application_system_message,
+    generate_openai_application_user_message,
 )
 import logging
 
@@ -23,20 +24,17 @@ class ApplicationGenerator(Generator):
 
     def generate_user_message(
         self, 
-        applications: list[ApplicationContent], 
         message: str, 
         chat_history: list[Message]
     ) -> str:
         match self._llm_type:
             case LLMType.OPENAI_GPT4:
-                return generate_openai_clarification_user_message(
-                    applications=applications,
+                return generate_openai_application_user_message(
                     message=message,
                     chat_history=chat_history
                 )
             case LLMType.OPENAI_GPT3_5:
-                return generate_openai_clarification_user_message(
-                    applications=applications,
+                return generate_openai_application_user_message(
                     message=message,
                     chat_history=chat_history
                 )
@@ -45,19 +43,17 @@ class ApplicationGenerator(Generator):
 
     async def generate(
         self, 
-        applications: list[ApplicationContent], 
         message: str, 
         chat_history: list[Message]
-    ) -> str:
+    ) -> CreateInferenceResponse:
         system_message: str = self.generate_system_message()
         user_message = self.generate_user_message(
-            applications=applications, 
             message=message, 
             chat_history=chat_history   
         )
             
         try:
-            response: str = await self._model.send_clarification_message(
+            response: CreateInferenceResponse = await self._model.send_application_message(
                 system_message=system_message,
                 user_message=user_message,
             )

@@ -5,10 +5,11 @@ from fastapi.responses import JSONResponse
 
 from app.config import APPLICATION_CONFIG, CLARIFICATION_CONFIG, HTTP_REQUEST_CONFIG, SELECTION_CONFIG
 from app.exceptions.exception import InferenceFailure
+from app.generator.create.application import ApplicationGenerator
 from app.generator.use.clarification import ClarificationGenerator
 from app.generator.use.selection import SelectionGenerator
 from app.generator.use.http_request import HttpRequestGenerator
-from app.models.inference.create import CreateInferenceRequest
+from app.models.inference.create import CreateInferenceRequest, CreateInferenceResponse
 from app.models.inference.use import HttpMethodResponse, SelectionResponse, UseInferenceResponse, UseInferenceRequest
 from app.processor.postprocess import Postprocessor
 from app.processor.preprocess import Preprocessor
@@ -62,7 +63,7 @@ async def generate_use_response(input: UseInferenceRequest) -> JSONResponse:
             original_applications=input.applications,
         )
         log.info(inference_response)
-        log.info("POST PROCESS COMPLETE")
+        log.info("USE INFERENCE COMPLETE")
         
         return JSONResponse(    
             status_code=200,
@@ -79,9 +80,14 @@ async def generate_use_response(input: UseInferenceRequest) -> JSONResponse:
 async def generate_use_response(input: CreateInferenceRequest) -> JSONResponse:
     try:
         application_generator = ApplicationGenerator(config=APPLICATION_CONFIG)
-        application_response: ApplicationResponse = await application_generator.generate(
+        inference_response: CreateInferenceResponse = await application_generator.generate(
             message=input.message,
             chat_history=input.chat_history,
+        )
+        log.info("CREATE INFERENCE COMPLETE")
+        return JSONResponse(    
+            status_code=200,
+            content=inference_response.model_dump(),
         )
     except InferenceFailure as e:
         log.error(f"Inference failure: {e}")

@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from app.models.application import ApplicationContent, Column, DataType
 
 from app.models.inference.use import HttpMethodResponse, UseInferenceResponse
-from app.prompts.use.functions import HttpMethodFunctions
+from app.prompts.use.functions import HttpMethodFunction
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -69,89 +69,89 @@ def _enforce_response_types_for_filter_conditions(
         condition: dict[str, Any],
         column_name_to_data_type: dict[str, DataType]
     ) -> dict[str]:
-        if HttpMethodFunctions.BOOLEAN_CLAUSE in condition:
+        if HttpMethodFunction.BOOLEAN_CLAUSE in condition:
             validated_sub_conditions: list[dict[str, Any]] = []
-            for sub_condition in condition[HttpMethodFunctions.CONDITIONS]:
+            for sub_condition in condition[HttpMethodFunction.CONDITIONS]:
                 validated_sub_conditions.append(validate_condition(
                     condition=sub_condition,
                     column_name_to_data_type=column_name_to_data_type,
                 ))
-            condition[HttpMethodFunctions.CONDITIONS] = validated_sub_conditions
+            condition[HttpMethodFunction.CONDITIONS] = validated_sub_conditions
             return condition 
         
         else:
-            column_name: str = condition[HttpMethodFunctions.COLUMN]
-            column_value: Any = condition[HttpMethodFunctions.VALUE]
+            column_name: str = condition[HttpMethodFunction.COLUMN]
+            column_value: Any = condition[HttpMethodFunction.VALUE]
             match column_name_to_data_type[column_name]:
                 case DataType.STRING:
                     if isinstance(column_value, list):
                         return {
-                            HttpMethodFunctions.COLUMN: column_name, 
-                            HttpMethodFunctions.OPERATOR: condition[HttpMethodFunctions.OPERATOR],
-                            HttpMethodFunctions.VALUE: [str(value) for value in column_value]
+                            HttpMethodFunction.COLUMN: column_name, 
+                            HttpMethodFunction.OPERATOR: condition[HttpMethodFunction.OPERATOR],
+                            HttpMethodFunction.VALUE: [str(value) for value in column_value]
                         }
                     else:
                         return {
-                            HttpMethodFunctions.COLUMN: column_name, 
-                            HttpMethodFunctions.OPERATOR: condition[HttpMethodFunctions.OPERATOR],
-                            HttpMethodFunctions.VALUE: str(column_value)
+                            HttpMethodFunction.COLUMN: column_name, 
+                            HttpMethodFunction.OPERATOR: condition[HttpMethodFunction.OPERATOR],
+                            HttpMethodFunction.VALUE: str(column_value)
                         }
                 case DataType.INTEGER:
                     if isinstance(column_value, list):
                         return {
-                            HttpMethodFunctions.COLUMN: column_name, 
-                            HttpMethodFunctions.OPERATOR: condition[HttpMethodFunctions.OPERATOR],
-                            HttpMethodFunctions.VALUE: [int(value) for value in column_value]
+                            HttpMethodFunction.COLUMN: column_name, 
+                            HttpMethodFunction.OPERATOR: condition[HttpMethodFunction.OPERATOR],
+                            HttpMethodFunction.VALUE: [int(value) for value in column_value]
                         }
                     else:
                         return {
-                            HttpMethodFunctions.COLUMN: column_name, 
-                            HttpMethodFunctions.OPERATOR: condition[HttpMethodFunctions.OPERATOR],
-                            HttpMethodFunctions.VALUE: int(column_value)
+                            HttpMethodFunction.COLUMN: column_name, 
+                            HttpMethodFunction.OPERATOR: condition[HttpMethodFunction.OPERATOR],
+                            HttpMethodFunction.VALUE: int(column_value)
                         }
                 case DataType.FLOAT:
                     if isinstance(column_value, list):
                         return {
-                            HttpMethodFunctions.COLUMN: column_name, 
-                            HttpMethodFunctions.OPERATOR: condition[HttpMethodFunctions.OPERATOR],
-                            HttpMethodFunctions.VALUE: [float(value) for value in column_value]
+                            HttpMethodFunction.COLUMN: column_name, 
+                            HttpMethodFunction.OPERATOR: condition[HttpMethodFunction.OPERATOR],
+                            HttpMethodFunction.VALUE: [float(value) for value in column_value]
                         }
                     else:
                         return {
-                            HttpMethodFunctions.COLUMN: column_name, 
-                            HttpMethodFunctions.OPERATOR: condition[HttpMethodFunctions.OPERATOR],
-                            HttpMethodFunctions.VALUE: float(column_value)
+                            HttpMethodFunction.COLUMN: column_name, 
+                            HttpMethodFunction.OPERATOR: condition[HttpMethodFunction.OPERATOR],
+                            HttpMethodFunction.VALUE: float(column_value)
                         }
                 case DataType.BOOLEAN:
                     return {
-                        HttpMethodFunctions.COLUMN: column_name, 
-                        HttpMethodFunctions.OPERATOR: condition[HttpMethodFunctions.OPERATOR],
-                        HttpMethodFunctions.VALUE: column_value
+                        HttpMethodFunction.COLUMN: column_name, 
+                        HttpMethodFunction.OPERATOR: condition[HttpMethodFunction.OPERATOR],
+                        HttpMethodFunction.VALUE: column_value
                     }
                 case DataType.DATE:
                     return {
-                        HttpMethodFunctions.COLUMN: column_name, 
-                        HttpMethodFunctions.OPERATOR: condition[HttpMethodFunctions.OPERATOR],
-                        HttpMethodFunctions.VALUE: column_value
+                        HttpMethodFunction.COLUMN: column_name, 
+                        HttpMethodFunction.OPERATOR: condition[HttpMethodFunction.OPERATOR],
+                        HttpMethodFunction.VALUE: column_value
                     }
                 case DataType.DATETIME:
                     return {
-                        HttpMethodFunctions.COLUMN: column_name, 
-                        HttpMethodFunctions.OPERATOR: condition[HttpMethodFunctions.OPERATOR],
-                        HttpMethodFunctions.VALUE: column_value
+                        HttpMethodFunction.COLUMN: column_name, 
+                        HttpMethodFunction.OPERATOR: condition[HttpMethodFunction.OPERATOR],
+                        HttpMethodFunction.VALUE: column_value
                     }
                 case DataType.ENUM:
                     if isinstance(column_value, list):
                         return {
-                            HttpMethodFunctions.COLUMN: column_name, 
-                            HttpMethodFunctions.OPERATOR: condition[HttpMethodFunctions.OPERATOR],
-                            HttpMethodFunctions.VALUE: [str(value) for value in column_value]
+                            HttpMethodFunction.COLUMN: column_name, 
+                            HttpMethodFunction.OPERATOR: condition[HttpMethodFunction.OPERATOR],
+                            HttpMethodFunction.VALUE: [str(value) for value in column_value]
                         }
                     else:
                         return {
-                            HttpMethodFunctions.COLUMN: column_name, 
-                            HttpMethodFunctions.OPERATOR: condition[HttpMethodFunctions.OPERATOR],
-                            HttpMethodFunctions.VALUE: str(column_value)
+                            HttpMethodFunction.COLUMN: column_name, 
+                            HttpMethodFunction.OPERATOR: condition[HttpMethodFunction.OPERATOR],
+                            HttpMethodFunction.VALUE: str(column_value)
                         }
                 case _:
                     raise ValueError(f"Data type {column_name_to_data_type[column_name]} is not supported")
@@ -167,15 +167,15 @@ def _enforce_response_types_for_filter_conditions(
         column_name_to_data_type: dict[str, DataType] = {column.name: column.data_type for column in table_columns}
         
         validated_filter_conditions: dict[str, Any] = {}
-        validated_filter_conditions[HttpMethodFunctions.BOOLEAN_CLAUSE] = input.filter_conditions[HttpMethodFunctions.BOOLEAN_CLAUSE]
+        validated_filter_conditions[HttpMethodFunction.BOOLEAN_CLAUSE] = input.filter_conditions[HttpMethodFunction.BOOLEAN_CLAUSE]
                 
         validated_conditions: list[dict[str, Any]] = []
-        for condition in input.filter_conditions[HttpMethodFunctions.CONDITIONS]:
+        for condition in input.filter_conditions[HttpMethodFunction.CONDITIONS]:
             validated_conditions.append(validate_condition(
                 condition=condition,
                 column_name_to_data_type=column_name_to_data_type,
             ))
-        validated_filter_conditions[HttpMethodFunctions.CONDITIONS] = validated_conditions
+        validated_filter_conditions[HttpMethodFunction.CONDITIONS] = validated_conditions
                 
         input.filter_conditions = validated_filter_conditions
         # The row(s) should only be updated in one table
