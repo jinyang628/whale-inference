@@ -153,6 +153,13 @@ class OpenAi(LLMBaseModel):
                     # Ensure that the application name is in the correct format
                     if json_response.get(ApplicationFunction.APPLICATION_CONTENT) and json_response.get(ApplicationFunction.APPLICATION_CONTENT).get(ApplicationFunction.NAME):
                         json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.NAME] = json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.NAME].replace(" ", "_").lower()
+                        
+                    # Ensure that the table and column names are in the correct format
+                    if json_response.get(ApplicationFunction.APPLICATION_CONTENT) and json_response.get(ApplicationFunction.APPLICATION_CONTENT).get(ApplicationFunction.TABLES):
+                        for table in json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.TABLES]:
+                            table[ApplicationFunction.NAME] = table[ApplicationFunction.NAME].replace(" ", "_").lower()
+                            for column in table[ApplicationFunction.COLUMNS]:
+                                column[ApplicationFunction.NAME] = column[ApplicationFunction.NAME].replace(" ", "_").lower()
                 case ApplicationFunction.CLARIFY:
                     pass
                 case ApplicationFunction.CONCLUDE:
