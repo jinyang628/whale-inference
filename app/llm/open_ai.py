@@ -160,6 +160,7 @@ class OpenAi(LLMBaseModel):
                             table[ApplicationFunction.NAME] = table[ApplicationFunction.NAME].replace(" ", "_").lower()
                             for column in table[ApplicationFunction.COLUMNS]:
                                 column[ApplicationFunction.NAME] = column[ApplicationFunction.NAME].replace(" ", "_").lower()
+                            
                 case ApplicationFunction.CLARIFY:
                     pass
                 case ApplicationFunction.CONCLUDE:
