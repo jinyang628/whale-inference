@@ -143,6 +143,7 @@ class OpenAi(LLMBaseModel):
                 ],
                 tools=[create_application(), clarify(), conclude()],
             )
+            # TODO: Known issue that sometimes it outputs a clarification question but does not choose the correct tool. Need to handle this case somehow
             tool_call = response.choices[0].message.tool_calls[0]
             tool_name = tool_call.function.name
             log.info(f"Tool called: {tool_name}")
