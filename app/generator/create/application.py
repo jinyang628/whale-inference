@@ -1,6 +1,8 @@
+from typing import Optional
 from app.exceptions.exception import InferenceFailure
 from app.generator.base import Generator
 from app.llm.model import LLMType
+from app.models.application import ApplicationContent
 from app.models.inference.create import CreateInferenceResponse, CreateMessage
 from app.prompts.create.application.open_ai import (
     generate_openai_application_system_message,
@@ -51,9 +53,13 @@ class ApplicationGenerator(Generator):
         )
             
         try:
+            last_application_draft: Optional[ApplicationContent] = None
+            if chat_history:
+               last_application_draft = chat_history[-1].application_content 
             response: CreateInferenceResponse = await self._model.send_application_message(
                 system_message=system_message,
                 user_message=user_message,
+                last_application_draft=last_application_draft
             )
             return response
         except InferenceFailure as e:

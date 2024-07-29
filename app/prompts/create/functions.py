@@ -11,6 +11,7 @@ class ApplicationFunction(StrEnum):
     APPLICATION_CONTENT = "application_content"
     NAME = "name"
     OVERVIEW = "overview"
+    CLARIFY = "clarify"
     CLARIFICATION = "clarification"
     TABLES = "tables"
     TABLE_NAME = "table_name"
@@ -25,9 +26,12 @@ class ApplicationFunction(StrEnum):
     FOREIGN_KEY = "foreign_key"
     TABLE = "table"
     COLUMN = "column"
+    CONCLUDE = "conclude"
+    CONCLUDING_MESSAGE = "concluding_message"
+
     
     
-def get_application_creation_schema() -> dict[str, Any]:
+def create_application() -> dict[str, Any]:
     function = {
         "type": "function",
         "function": {
@@ -122,7 +126,48 @@ def get_application_creation_schema() -> dict[str, Any]:
                         "type": "string",
                         "description": "A question to ask the user for clarification if needed"
                     }
-                }
+                },
+                "required": [ApplicationFunction.APPLICATION_CONTENT, ApplicationFunction.OVERVIEW]
+            }
+        }
+    }
+    return function
+
+def clarify() -> dict[str, Any]:
+    function = {
+        "type": "function",
+        "function": {
+            "name": ApplicationFunction.CLARIFY,
+            "description": "Ask the user for clarification on the application requirements",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    ApplicationFunction.CLARIFICATION: {
+                        "type": "string",
+                        "description": "A question to ask the user for clarification"
+                    }
+                },
+                "required": [ApplicationFunction.CLARIFICATION]
+            }
+        }
+    }
+    return function
+
+def conclude() -> dict[str, Any]:
+    function = {
+        "type": "function",
+        "function": {
+            "name": ApplicationFunction.CONCLUDE,
+            "description": "Conclude the conversation with the user and inform him that the application has been created",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    ApplicationFunction.CONCLUDING_MESSAGE: {
+                        "type": "string",
+                        "description": "The message to send to the user to conclude the conversation"
+                    }
+                },
+                "required": [ApplicationFunction.CONCLUDING_MESSAGE]
             }
         }
     }

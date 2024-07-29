@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 from app.exceptions.exception import InferenceFailure
 from app.llm.base import LLMBaseModel, LLMConfig
 from openai import OpenAI
@@ -8,7 +9,7 @@ from dotenv import load_dotenv
 from app.models.application import ApplicationContent, Table
 from app.models.inference.create import CreateInferenceResponse
 from app.models.inference.use import HttpMethod, HttpMethodResponse, SelectionResponse
-from app.prompts.create.functions import ApplicationFunction, get_application_creation_schema
+from app.prompts.create.functions import ApplicationFunction, clarify, conclude, create_application
 
 from app.prompts.use.functions import HttpMethodFunction, SelectionFunction, get_http_method_parameters_function, get_selection_function
 
@@ -130,6 +131,7 @@ class OpenAi(LLMBaseModel):
         self,
         system_message: str,
         user_message: str,
+        last_application_draft: Optional[ApplicationContent]
     ) -> CreateInferenceResponse:
         log.info(f"Sending application message to OpenAI")
         try:
@@ -139,22 +141,25 @@ class OpenAi(LLMBaseModel):
                     {"role": "system", "content": system_message},
                     {"role": "user", "content": user_message},
                 ],
-                tools=[get_application_creation_schema()],
-                tool_choice={
-                    "type": "function",
-                    "function": {
-                        "name": ApplicationFunction.CREATE_APPLICATION
-                    }
-                },
+                tools=[create_application(), clarify(), conclude()],
             )
             tool_call = response.choices[0].message.tool_calls[0]
+            tool_name = tool_call.function.name
+            log.info(f"Tool called: {tool_name}")
             json_response: dict[str, str] = json.loads(tool_call.function.arguments)
             log.info(f"Initial Application Creation Response: {json_response}")
+            match tool_name:
+                case ApplicationFunction.CREATE_APPLICATION:
+                    # Ensure that the application name is in the correct format
+                    if json_response.get(ApplicationFunction.APPLICATION_CONTENT) and json_response.get(ApplicationFunction.APPLICATION_CONTENT).get(ApplicationFunction.NAME):
+                        json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.NAME] = json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.NAME].replace(" ", "_").lower()
+                case ApplicationFunction.CLARIFY:
+                    pass
+                case ApplicationFunction.CONCLUDE:
+                    json_response[ApplicationFunction.APPLICATION_CONTENT] = last_application_draft.model_dump()
+                case _:
+                    raise ValueError(f"Unsupported tool name: {tool_name}")
             
-            # Ensure that the application name is in the correct format
-            if json_response[ApplicationFunction.APPLICATION_CONTENT] and json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.NAME]:
-                json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.NAME] = json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.NAME].replace(" ", "_").lower()
-                
             response = CreateInferenceResponse.model_validate(json_response)
             log.info(response)
             return response
