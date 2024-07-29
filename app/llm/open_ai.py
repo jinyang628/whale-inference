@@ -150,6 +150,7 @@ class OpenAi(LLMBaseModel):
             log.info(f"Initial Application Creation Response: {json_response}")
             match tool_name:
                 case ApplicationFunction.CREATE_APPLICATION:
+                    
                     # Ensure that the application name is in the correct format
                     if json_response.get(ApplicationFunction.APPLICATION_CONTENT) and json_response.get(ApplicationFunction.APPLICATION_CONTENT).get(ApplicationFunction.NAME):
                         json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.NAME] = json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.NAME].replace(" ", "_").lower()
@@ -160,6 +161,10 @@ class OpenAi(LLMBaseModel):
                             table[ApplicationFunction.NAME] = table[ApplicationFunction.NAME].replace(" ", "_").lower()
                             for column in table[ApplicationFunction.COLUMNS]:
                                 column[ApplicationFunction.NAME] = column[ApplicationFunction.NAME].replace(" ", "_").lower()
+                    
+                    # LLM keep putting this additional Primary Key column at the application level when it should be a per table parameter
+                    if json_response.get(ApplicationFunction.APPLICATION_CONTENT) and json_response.get(ApplicationFunction.APPLICATION_CONTENT).get(ApplicationFunction.PRIMARY_KEY):
+                        del json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.PRIMARY_KEY]
                             
                 case ApplicationFunction.CLARIFY:
                     pass
