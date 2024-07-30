@@ -135,13 +135,14 @@ class OpenAi(LLMBaseModel):
     ) -> CreateInferenceResponse:
         log.info(f"Sending application message to OpenAI")
         try:
+            available_tools = [create_application(), clarify(), conclude()] if last_application_draft else [create_application(), clarify()]
             response = self._client.chat.completions.create(
                 model=self._model_name,
                 messages=[
                     {"role": "system", "content": system_message},
                     {"role": "user", "content": user_message},
                 ],
-                tools=[create_application(), clarify(), conclude()],
+                tools=available_tools,
             )
             log.info(response)
             # TODO: Known issue that sometimes it outputs a clarification question but does not choose the correct tool. Need to handle this case somehow
@@ -154,7 +155,6 @@ class OpenAi(LLMBaseModel):
             log.info(f"Initial Application Creation Response: {json_response}")
             match tool_name:
                 case ApplicationFunction.CREATE_APPLICATION:
-                    
                     # Ensure that the application name is in the correct format
                     if json_response.get(ApplicationFunction.APPLICATION_CONTENT) and json_response.get(ApplicationFunction.APPLICATION_CONTENT).get(ApplicationFunction.NAME):
                         json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.NAME] = json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.NAME].replace(" ", "_").lower()
@@ -169,7 +169,16 @@ class OpenAi(LLMBaseModel):
                     # LLM keep putting this additional Primary Key column at the application level when it should be a per table parameter
                     if json_response.get(ApplicationFunction.APPLICATION_CONTENT) and json_response.get(ApplicationFunction.APPLICATION_CONTENT).get(ApplicationFunction.PRIMARY_KEY):
                         del json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.PRIMARY_KEY]
-                            
+                        
+                    # LLM keep putting this overview at the application level when it should be not nested
+                    if json_response.get(ApplicationFunction.APPLICATION_CONTENT) and json_response.get(ApplicationFunction.APPLICATION_CONTENT).get(ApplicationFunction.OVERVIEW):
+                        json_response[ApplicationFunction.OVERVIEW] = json_response.get(ApplicationFunction.APPLICATION_CONTENT).get(ApplicationFunction.OVERVIEW)
+                        del json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.OVERVIEW]
+                    
+                    # LLM keep putting this clarification at the application level when it should be not nested
+                    if json_response.get(ApplicationFunction.APPLICATION_CONTENT) and json_response.get(ApplicationFunction.APPLICATION_CONTENT).get(ApplicationFunction.CLARIFICATION):
+                        json_response[ApplicationFunction.CLARIFICATION] = json_response.get(ApplicationFunction.APPLICATION_CONTENT).get(ApplicationFunction.CLARIFICATION)
+                        del json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.CLARIFICATION]
                 case ApplicationFunction.CLARIFY:
                     pass
                 case ApplicationFunction.CONCLUDE:
