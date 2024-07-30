@@ -376,6 +376,12 @@ def _build_rows_schema(columns: list[Column]) -> dict[str, Any]:
                 "type": "string",
                 "description": f"The value for the {name} column in the inserted row. Make sure that the value is in the format of YYYY-MM-DD."
             }
+        elif data_type == DataType.DATETIME:
+            # Datetime objects are not JSON serialisable across API requests so this is the best alternative
+            inserted_rows_schema[name] = {
+                "type": "string",
+                "description": f"The value for the {name} column in the inserted row. Make sure that the value is in the format of YYYY-MM-DDTHH:MM:SSZ."
+            }
         elif data_type == DataType.FLOAT:
             # Floats are called numbers in OpenAI function calling schema
             inserted_rows_schema[name] = {
