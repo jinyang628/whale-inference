@@ -1,7 +1,7 @@
 from enum import StrEnum
 from typing import Any
 import logging
-from app.models.application import PrimaryKey
+from app.models.application import DataType, PrimaryKey
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -73,7 +73,7 @@ def create_application() -> dict[str, Any]:
                                                     },
                                                     ApplicationFunction.DATA_TYPE: {
                                                         "type": "string",
-                                                        "enum": ["string", "integer", "float", "boolean", "date", "datetime", "uuid", "enum"],
+                                                        "enum": [data_type.value for data_type in DataType.__members__.values()],
                                                         "description": "The data type of the column"
                                                     },
                                                     ApplicationFunction.ENUM_VALUES: {

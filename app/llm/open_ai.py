@@ -179,13 +179,14 @@ class OpenAi(LLMBaseModel):
                     if json_response.get(ApplicationFunction.APPLICATION_CONTENT) and json_response.get(ApplicationFunction.APPLICATION_CONTENT).get(ApplicationFunction.CLARIFICATION):
                         json_response[ApplicationFunction.CLARIFICATION] = json_response.get(ApplicationFunction.APPLICATION_CONTENT).get(ApplicationFunction.CLARIFICATION)
                         del json_response[ApplicationFunction.APPLICATION_CONTENT][ApplicationFunction.CLARIFICATION]
+                        
                 case ApplicationFunction.CLARIFY:
                     pass
                 case ApplicationFunction.CONCLUDE:
                     json_response[ApplicationFunction.APPLICATION_CONTENT] = last_application_draft.model_dump()
                 case _:
                     raise ValueError(f"Unsupported tool name: {tool_name}")
-            
+            log.info(f"Processed Application Creation Response: {json_response}")
             response = CreateInferenceResponse.model_validate(json_response)
             log.info(response)
             return response
