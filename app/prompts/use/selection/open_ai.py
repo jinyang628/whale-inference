@@ -2,7 +2,7 @@ from app.models.application import ApplicationContent
 from app.models.inference.use import UseMessage
 
 
-def generate_openai_selection_system_message() -> str:    
+def generate_openai_selection_system_message() -> str:
     return f"""Your task is to interpret the user's natural language instruction and select the relevant (task, application, table name, HTTP method) groupings so that an ORM can use your output to perform specific actions on the databases of applications.
 
 Follow these guidelines: 
@@ -14,16 +14,15 @@ Follow these guidelines:
     6. The chat history is provided as additional context for you to interpret the user's current instruction, but you only have to generate the relevant groupings based on the user's current instruction. 
 """
 
-    # Note: There's this problem of the LLM splitting filter conditions into separate tasks. This is a problem because the filter conditions are part of the same task. 
-    
+    # Note: There's this problem of the LLM splitting filter conditions into separate tasks. This is a problem because the filter conditions are part of the same task.
+
     # 1. The user's instruction might compose of multiple tasks and you need to split up his instruction into multiple sub-tasks. Rephrase or summarise if necessary, but do not leave out any necessary information when describing the sub-task.
-    # 2. Note that filter conditions belongs to the same task. E.g. "Show me all the users with the name John or have an age higher than 12" is one single task. Do not split this up. 
+    # 2. Note that filter conditions belongs to the same task. E.g. "Show me all the users with the name John or have an age higher than 12" is one single task. Do not split this up.
+
 
 def generate_openai_selection_user_message(
-    applications: list[ApplicationContent],
-    message: str,
-    chat_history: list[UseMessage]
-) -> str:    
+    applications: list[ApplicationContent], message: str, chat_history: list[UseMessage]
+) -> str:
     return f"""### Here are the applications that might be relevant to the user's instruction:
 
 {[application.model_dump() for application in applications]}

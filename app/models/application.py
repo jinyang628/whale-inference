@@ -1,6 +1,8 @@
 from enum import StrEnum
-from pydantic import BaseModel, model_validator
 from typing import Any, Optional
+
+from pydantic import BaseModel, model_validator
+
 
 class DataType(StrEnum):
     STRING = "string"
@@ -12,10 +14,12 @@ class DataType(StrEnum):
     UUID = "uuid"
     ENUM = "enum"
 
+
 class PrimaryKey(StrEnum):
     AUTO_INCREMENT = "auto_increment"
     UUID = "uuid"
-    
+
+
 class ForeignKey(BaseModel):
     table: str
     column: str
@@ -36,31 +40,38 @@ class Column(BaseModel):
 
         if not isinstance(data, dict):
             raise ValueError("Column data must be a dictionary.")
-        
+
         cls._validate_enum_values(data)
         cls._set_default_value(data)
-        
+
         return data
-    
-    
+
     @staticmethod
     def _validate_enum_values(data: dict) -> None:
-        if data.get('data_type') == DataType.ENUM:
+        if data.get("data_type") == DataType.ENUM:
             if data.get("enum_values") is None:
-                raise ValueError("enum_values must be set for columns with data type 'enum'.")
+                raise ValueError(
+                    "enum_values must be set for columns with data type 'enum'."
+                )
             if not data.get("enum_values"):
                 raise ValueError("enum_values cannot be empty.")
             if len(data.get("enum_values")) != len(set(data.get("enum_values"))):
                 raise ValueError("enum_values must be unique.")
-            non_string_values = [v for v in data.get('enum_values') if not isinstance(v, str)]
+            non_string_values = [
+                v for v in data.get("enum_values") if not isinstance(v, str)
+            ]
             if non_string_values:
-                raise ValueError(f"All enum_values must be of type string. Non-string values found: {non_string_values}")
-            if data.get('default_value') not in data.get("enum_values"):
+                raise ValueError(
+                    f"All enum_values must be of type string. Non-string values found: {non_string_values}"
+                )
+            if data.get("default_value") not in data.get("enum_values"):
                 raise ValueError("default_value must be one of the enum_values.")
         else:
             if data.get("enum_values"):
-                raise ValueError("enum_values can only be set for columns with data type 'enum'.")
-     
+                raise ValueError(
+                    "enum_values can only be set for columns with data type 'enum'."
+                )
+
     @staticmethod
     def _set_default_value(data: dict) -> None:
         # If the default value is set, use it
@@ -86,14 +97,15 @@ class Column(BaseModel):
         self._validate_name()
 
     def _validate_name(self):
-        if not self.name: 
+        if not self.name:
             raise ValueError("Column name cannot be empty.")
-        
+
         if not self.name.islower():
             raise ValueError("All characters in column name must be in lower case.")
-        
+
         if " " in self.name:
             raise ValueError("Column name cannot contain spaces.")
+
 
 class Table(BaseModel):
     name: str
@@ -107,20 +119,19 @@ class Table(BaseModel):
         self._validate_name()
 
     def _validate_name(self):
-        if not self.name: 
+        if not self.name:
             raise ValueError("Table name cannot be empty.")
-        
+
         if not self.name.islower():
             raise ValueError("All characters in table name must be in lower case.")
-        
+
         if " " in self.name:
             raise ValueError("Table name cannot contain spaces.")
-    
+
+
 class ApplicationContent(BaseModel):
     name: str
     tables: list[Table]
 
-    
-    class Config: 
+    class Config:
         extra = "forbid"
-        
