@@ -170,6 +170,14 @@ def _enforce_response_types_for_filter_conditions(
                         ],
                         HttpMethodFunction.VALUE: column_value,
                     }
+                case DataType.UUID:
+                    return {
+                        HttpMethodFunction.COLUMN: column_name,
+                        HttpMethodFunction.OPERATOR: condition[
+                            HttpMethodFunction.OPERATOR
+                        ],
+                        HttpMethodFunction.VALUE: str(column_value),
+                    }
                 case DataType.ENUM:
                     if isinstance(column_value, list):
                         return {
@@ -199,7 +207,10 @@ def _enforce_response_types_for_filter_conditions(
             continue
         table_columns: list[Column] = table.columns
         # Add id as a possible field to filter by
-        table_columns.append(Column(name="id", data_type=DataType.INTEGER))
+        if table.primary_key == "auto_increment":
+            table_columns.append(Column(name="id", data_type=DataType.INTEGER))
+        elif table.primary_key == "uuid":
+            table_columns.append(Column(name="id", data_type=DataType.UUID))
 
         column_name_to_data_type: dict[str, DataType] = {
             column.name: column.data_type for column in table_columns
@@ -269,6 +280,8 @@ def _enforce_response_types_for_updated_data(
                     validated_updated_data[column_name] = column_value
                 case DataType.DATETIME:
                     validated_updated_data[column_name] = column_value
+                case DataType.UUID:
+                    validated_updated_data[column_name] = str(column_value)
                 case DataType.ENUM:
                     if isinstance(column_value, list):
                         validated_updated_data[column_name] = [
@@ -330,6 +343,8 @@ def _enforce_response_types_for_inserted_rows(
                         validated_inserted_row[column_name] = column_value
                     case DataType.DATETIME:
                         validated_inserted_row[column_name] = column_value
+                    case DataType.UUID:
+                        validated_inserted_row[column_name] = str(column_value)
                     case DataType.ENUM:
                         if isinstance(column_value, list):
                             validated_inserted_row[column_name] = [

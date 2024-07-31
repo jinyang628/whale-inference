@@ -266,7 +266,6 @@ class OpenAi(LLMBaseModel):
                         del json_response[ApplicationFunction.APPLICATION_CONTENT][
                             ApplicationFunction.CLARIFICATION
                         ]
-
                 case ApplicationFunction.CLARIFY:
                     pass
                 case ApplicationFunction.CONCLUDE:
