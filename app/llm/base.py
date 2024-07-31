@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 from pydantic import BaseModel
-from app.models.application import ApplicationContent, Table
 
+from app.models.application import ApplicationContent, Table
 from app.models.inference.use import HttpMethod, HttpMethodResponse, SelectionResponse
 
 
@@ -35,21 +35,21 @@ class LLMBaseModel(ABC):
         user_message: str,
         application: ApplicationContent,
         http_method: HttpMethod,
-        table: Table
+        table: Table,
     ) -> HttpMethodResponse:
         """Sends a message to the AI and returns the response."""
         pass
-    
+
     @abstractmethod
     async def send_selection_message(
         self,
         system_message: str,
         user_message: str,
-        applications: list[ApplicationContent]
+        applications: list[ApplicationContent],
     ) -> SelectionResponse:
         """Sends a message to the AI and returns the response."""
         pass
-    
+
     @abstractmethod
     async def send_clarification_message(
         self,

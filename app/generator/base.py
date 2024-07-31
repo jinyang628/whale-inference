@@ -1,11 +1,13 @@
+import logging
 from abc import ABC, abstractmethod
 from typing import Any
+
 from app.config import InferenceConfig
 from app.llm.base import LLMBaseModel
 from app.llm.model import LLM, LLMType
-import logging
 
 log = logging.getLogger(__name__)
+
 
 class Generator(ABC):
 
@@ -21,11 +23,11 @@ class Generator(ABC):
     @abstractmethod
     def generate_system_message(self, *args, **kwargs) -> Any:
         pass
-    
+
     @abstractmethod
     def generate_user_message(self, *args, **kwargs) -> Any:
         pass
-    
+
     @abstractmethod
     def generate(self, *args, **kwargs) -> Any:
         pass

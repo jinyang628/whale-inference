@@ -5,10 +5,9 @@ from app.models.inference.use import UseMessage
 def generate_openai_clarification_system_message() -> str:
     return f"""Your task is to clarify the user's natural language instruction so that an AI agent can use your output to perform specific actions on the databases of applications. Currently, the user's instruction is not clear enough for the AI agent to understand which applications, tables, and HTTP methods to use. Your job is to ask for the necessary information that is missing."""
 
+
 def generate_openai_clarification_user_message(
-    applications: list[ApplicationContent], 
-    message: str, 
-    chat_history: list[UseMessage]
+    applications: list[ApplicationContent], message: str, chat_history: list[UseMessage]
 ) -> str:
     return f"""### Here are the applications that might be relevant to the user's instruction:
 
@@ -22,5 +21,3 @@ def generate_openai_clarification_user_message(
 
 {message}
 """
-
-    

@@ -1,11 +1,13 @@
+import logging
 from enum import StrEnum
 from typing import Any
-import logging
+
 from app.models.application import ApplicationContent, Column, DataType, Table
 from app.models.inference.use import HttpMethod
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
+
 
 class SelectionFunction(StrEnum):
     SELECT = "select"
@@ -14,11 +16,10 @@ class SelectionFunction(StrEnum):
     TABLE_NAME = "table_name"
     HTTP_METHOD = "http_method"
     RELEVANT_GROUPINGS = "relevant_groupings"
-    
-def get_selection_function(
-    applications: list[ApplicationContent]
-) -> dict[str, Any]:
-    
+
+
+def get_selection_function(applications: list[ApplicationContent]) -> dict[str, Any]:
+
     function = {
         "type": "function",
         "function": {
@@ -35,12 +36,14 @@ def get_selection_function(
                             "properties": {
                                 SelectionFunction.TASK: {
                                     "type": "string",
-                                    "description": "This task represents a single step in the entire user instruction."
+                                    "description": "This task represents a single step in the entire user instruction.",
                                 },
                                 SelectionFunction.APPLICATION_NAME: {
                                     "type": "string",
-                                    "enum": [application.name for application in applications],
-                                    "description": "The name of the application to use the HTTP method on."
+                                    "enum": [
+                                        application.name for application in applications
+                                    ],
+                                    "description": "The name of the application to use the HTTP method on.",
                                 },
                                 SelectionFunction.TABLE_NAME: {
                                     "type": "string",
@@ -50,17 +53,23 @@ def get_selection_function(
                                     "type": "string",
                                     "enum": [method.value for method in HttpMethod],
                                     "description": "The HTTP method to use on the chosen application's table",
-                                }
+                                },
                             },
-                            "required": [SelectionFunction.TASK, SelectionFunction.APPLICATION_NAME, SelectionFunction.TABLE_NAME, SelectionFunction.HTTP_METHOD]
-                        }
+                            "required": [
+                                SelectionFunction.TASK,
+                                SelectionFunction.APPLICATION_NAME,
+                                SelectionFunction.TABLE_NAME,
+                                SelectionFunction.HTTP_METHOD,
+                            ],
+                        },
                     }
-                }
-            }
-        }
+                },
+            },
+        },
     }
-    
+
     return function
+
 
 class HttpMethodFunction(StrEnum):
     GET_HTTP_METHOD_PARAMETERS = "get_http_method_parameters"
@@ -75,10 +84,10 @@ class HttpMethodFunction(StrEnum):
     CONDITIONS = "conditions"
     TABLE_NAME = "table_name"
     FILTER_CONDITIONS = "filter_conditions"
-    
+
+
 def get_http_method_parameters_function(
-    http_method: HttpMethod,
-    table: Table
+    http_method: HttpMethod, table: Table
 ) -> dict[str, Any]:
     match http_method:
         case HttpMethod.GET:
@@ -89,7 +98,8 @@ def get_http_method_parameters_function(
             return _get_put_http_method_parameters_function(columns=table.columns)
         case HttpMethod.DELETE:
             return _get_delete_http_method_parameters_function(columns=table.columns)
-        
+
+
 def _get_post_http_method_parameters_function(columns: list[Column]) -> dict[str, Any]:
     function = {
         "type": "function",
@@ -105,22 +115,27 @@ def _get_post_http_method_parameters_function(columns: list[Column]) -> dict[str
                         "items": {
                             "type": "object",
                             "properties": _build_rows_schema(columns=columns),
-                            "required": [column.name for column in columns if not column.nullable]
-                        }
+                            "required": [
+                                column.name for column in columns if not column.nullable
+                            ],
+                        },
                     }
                 },
-                "required": [HttpMethodFunction.INSERTED_ROWS]
-            }
-        }
+                "required": [HttpMethodFunction.INSERTED_ROWS],
+            },
+        },
     }
     log.info(f"Post HTTP Method Parameters Function: {function}")
     return function
 
-def _get_delete_http_method_parameters_function(columns: list[Column]) -> dict[str, Any]:
-    
+
+def _get_delete_http_method_parameters_function(
+    columns: list[Column],
+) -> dict[str, Any]:
+
     column_name_enum_lst = [column.name for column in columns]
     column_name_enum_lst.append("id")
-    
+
     function = {
         "type": "function",
         "function": {
@@ -136,7 +151,7 @@ def _get_delete_http_method_parameters_function(columns: list[Column]) -> dict[s
                             HttpMethodFunction.BOOLEAN_CLAUSE: {
                                 "type": "string",
                                 "enum": ["AND", "OR"],
-                                "description": "The boolean clause to apply to the conditions"
+                                "description": "The boolean clause to apply to the conditions",
                             },
                             HttpMethodFunction.CONDITIONS: {
                                 "type": "array",
@@ -148,12 +163,21 @@ def _get_delete_http_method_parameters_function(columns: list[Column]) -> dict[s
                                                 HttpMethodFunction.COLUMN: {
                                                     "type": "string",
                                                     "enum": column_name_enum_lst,
-                                                    "description": "The name of the column to filter on"
+                                                    "description": "The name of the column to filter on",
                                                 },
                                                 HttpMethodFunction.OPERATOR: {
                                                     "type": "string",
-                                                    "enum": ["=", "!=", ">", "<", ">=", "<=", "LIKE", "IN"],
-                                                    "description": "The comparison operator"
+                                                    "enum": [
+                                                        "=",
+                                                        "!=",
+                                                        ">",
+                                                        "<",
+                                                        ">=",
+                                                        "<=",
+                                                        "LIKE",
+                                                        "IN",
+                                                    ],
+                                                    "description": "The comparison operator",
                                                 },
                                                 HttpMethodFunction.VALUE: {
                                                     "oneOf": [
@@ -168,38 +192,46 @@ def _get_delete_http_method_parameters_function(columns: list[Column]) -> dict[s
                                                                     {"type": "string"},
                                                                     {"type": "number"},
                                                                     {"type": "boolean"},
-                                                                    {"type": "null"}
+                                                                    {"type": "null"},
                                                                 ]
-                                                            }
-                                                        }
+                                                            },
+                                                        },
                                                     ],
-                                                    "description": "The value to compare against. Use array for IN operator. Make sure the type of the value matches the specified column's data type."
-                                                }
+                                                    "description": "The value to compare against. Use array for IN operator. Make sure the type of the value matches the specified column's data type.",
+                                                },
                                             },
-                                            "required": [HttpMethodFunction.COLUMN, HttpMethodFunction.OPERATOR, HttpMethodFunction.VALUE]
+                                            "required": [
+                                                HttpMethodFunction.COLUMN,
+                                                HttpMethodFunction.OPERATOR,
+                                                HttpMethodFunction.VALUE,
+                                            ],
                                         },
                                         {
                                             "$ref": "#/properties/HttpMethodFunctions.FILTER_CONDITIONS"
-                                        }
+                                        },
                                     ]
-                                }
-                            }
+                                },
+                            },
                         },
-                        "required": [HttpMethodFunction.BOOLEAN_CLAUSE, HttpMethodFunction.CONDITIONS]
+                        "required": [
+                            HttpMethodFunction.BOOLEAN_CLAUSE,
+                            HttpMethodFunction.CONDITIONS,
+                        ],
                     }
                 },
-                "required": [HttpMethodFunction.FILTER_CONDITIONS]
-            }
-        }
+                "required": [HttpMethodFunction.FILTER_CONDITIONS],
+            },
+        },
     }
     log.info(f"Delete HTTP Method Parameters Function: {function}")
     return function
 
+
 def _get_get_http_method_parameters_function(columns: list[Column]) -> dict[str, Any]:
-    
+
     column_name_enum_lst = [column.name for column in columns]
     column_name_enum_lst.append("id")
-    
+
     function = {
         "type": "function",
         "function": {
@@ -215,7 +247,7 @@ def _get_get_http_method_parameters_function(columns: list[Column]) -> dict[str,
                             HttpMethodFunction.BOOLEAN_CLAUSE: {
                                 "type": "string",
                                 "enum": ["AND", "OR"],
-                                "description": "The boolean clause to apply to the conditions"
+                                "description": "The boolean clause to apply to the conditions",
                             },
                             HttpMethodFunction.CONDITIONS: {
                                 "type": "array",
@@ -227,12 +259,22 @@ def _get_get_http_method_parameters_function(columns: list[Column]) -> dict[str,
                                                 HttpMethodFunction.COLUMN: {
                                                     "type": "string",
                                                     "enum": column_name_enum_lst,
-                                                    "description": "The name of the column to filter on"
+                                                    "description": "The name of the column to filter on",
                                                 },
                                                 HttpMethodFunction.OPERATOR: {
                                                     "type": "string",
-                                                    "enum": ["=", "!=", ">", "<", ">=", "<=", "LIKE", "IN", "IS NOT"],
-                                                    "description": "The comparison operator"
+                                                    "enum": [
+                                                        "=",
+                                                        "!=",
+                                                        ">",
+                                                        "<",
+                                                        ">=",
+                                                        "<=",
+                                                        "LIKE",
+                                                        "IN",
+                                                        "IS NOT",
+                                                    ],
+                                                    "description": "The comparison operator",
                                                 },
                                                 HttpMethodFunction.VALUE: {
                                                     "oneOf": [
@@ -247,38 +289,46 @@ def _get_get_http_method_parameters_function(columns: list[Column]) -> dict[str,
                                                                     {"type": "string"},
                                                                     {"type": "number"},
                                                                     {"type": "boolean"},
-                                                                    {"type": "null"}
+                                                                    {"type": "null"},
                                                                 ]
-                                                            }
-                                                        }
+                                                            },
+                                                        },
                                                     ],
-                                                    "description": "The value to compare against. Use array for IN operator. Make sure the type of the value matches the specified column's data type."
-                                                }
+                                                    "description": "The value to compare against. Use array for IN operator. Make sure the type of the value matches the specified column's data type.",
+                                                },
                                             },
-                                            "required": [HttpMethodFunction.COLUMN, HttpMethodFunction.OPERATOR, HttpMethodFunction.VALUE]
+                                            "required": [
+                                                HttpMethodFunction.COLUMN,
+                                                HttpMethodFunction.OPERATOR,
+                                                HttpMethodFunction.VALUE,
+                                            ],
                                         },
                                         {
                                             "$ref": "#/properties/HttpMethodFunctions.FILTER_CONDITIONS"
-                                        }
+                                        },
                                     ]
-                                }
-                            }
+                                },
+                            },
                         },
-                        "required": [HttpMethodFunction.BOOLEAN_CLAUSE, HttpMethodFunction.CONDITIONS]
+                        "required": [
+                            HttpMethodFunction.BOOLEAN_CLAUSE,
+                            HttpMethodFunction.CONDITIONS,
+                        ],
                     }
                 },
-                "required": [HttpMethodFunction.FILTER_CONDITIONS]
-            }
-        }
+                "required": [HttpMethodFunction.FILTER_CONDITIONS],
+            },
+        },
     }
     log.info(f"Get HTTP Method Parameters Function: {function}")
     return function
 
+
 def _get_put_http_method_parameters_function(columns: list[Column]) -> dict[str, Any]:
-    
+
     column_name_enum_lst = [column.name for column in columns]
     column_name_enum_lst.append("id")
-    
+
     function = {
         "type": "function",
         "function": {
@@ -294,7 +344,7 @@ def _get_put_http_method_parameters_function(columns: list[Column]) -> dict[str,
                             HttpMethodFunction.BOOLEAN_CLAUSE: {
                                 "type": "string",
                                 "enum": ["AND", "OR"],
-                                "description": "The boolean clause to apply to the conditions"
+                                "description": "The boolean clause to apply to the conditions",
                             },
                             HttpMethodFunction.CONDITIONS: {
                                 "type": "array",
@@ -306,12 +356,21 @@ def _get_put_http_method_parameters_function(columns: list[Column]) -> dict[str,
                                                 HttpMethodFunction.COLUMN: {
                                                     "type": "string",
                                                     "enum": column_name_enum_lst,
-                                                    "description": "The name of the column to filter on"
+                                                    "description": "The name of the column to filter on",
                                                 },
                                                 HttpMethodFunction.OPERATOR: {
                                                     "type": "string",
-                                                    "enum": ["=", "!=", ">", "<", ">=", "<=", "LIKE", "IN"],
-                                                    "description": "The comparison operator"
+                                                    "enum": [
+                                                        "=",
+                                                        "!=",
+                                                        ">",
+                                                        "<",
+                                                        ">=",
+                                                        "<=",
+                                                        "LIKE",
+                                                        "IN",
+                                                    ],
+                                                    "description": "The comparison operator",
                                                 },
                                                 HttpMethodFunction.VALUE: {
                                                     "oneOf": [
@@ -326,37 +385,48 @@ def _get_put_http_method_parameters_function(columns: list[Column]) -> dict[str,
                                                                     {"type": "string"},
                                                                     {"type": "number"},
                                                                     {"type": "boolean"},
-                                                                    {"type": "null"}
+                                                                    {"type": "null"},
                                                                 ]
-                                                            }
-                                                        }
+                                                            },
+                                                        },
                                                     ],
-                                                    "description": "The value to compare against. Use array for IN operator. Make sure the type of the value matches the specified column's data type."
-                                                }
+                                                    "description": "The value to compare against. Use array for IN operator. Make sure the type of the value matches the specified column's data type.",
+                                                },
                                             },
-                                            "required": [HttpMethodFunction.COLUMN, HttpMethodFunction.OPERATOR, HttpMethodFunction.VALUE]
+                                            "required": [
+                                                HttpMethodFunction.COLUMN,
+                                                HttpMethodFunction.OPERATOR,
+                                                HttpMethodFunction.VALUE,
+                                            ],
                                         },
                                         {
                                             "$ref": "#/properties/HttpMethodFunctions.FILTER_CONDITIONS"
-                                        }
+                                        },
                                     ]
-                                }
-                            }
+                                },
+                            },
                         },
-                        "required": [HttpMethodFunction.BOOLEAN_CLAUSE, HttpMethodFunction.CONDITIONS]
+                        "required": [
+                            HttpMethodFunction.BOOLEAN_CLAUSE,
+                            HttpMethodFunction.CONDITIONS,
+                        ],
                     },
                     HttpMethodFunction.UPDATED_DATA: {
                         "type": "object",
                         "description": "An object containing the columns to be updated and their new values",
                         "properties": _build_rows_schema(columns=columns),
-                    }
+                    },
                 },
-                "required": [HttpMethodFunction.FILTER_CONDITIONS, HttpMethodFunction.UPDATED_DATA]
-            }
-        }
+                "required": [
+                    HttpMethodFunction.FILTER_CONDITIONS,
+                    HttpMethodFunction.UPDATED_DATA,
+                ],
+            },
+        },
     }
     log.info(f"PUT HTTP Method Parameters Function: {function}")
     return function
+
 
 def _build_rows_schema(columns: list[Column]) -> dict[str, Any]:
     inserted_rows_schema: dict[str, Any] = {}
@@ -368,31 +438,31 @@ def _build_rows_schema(columns: list[Column]) -> dict[str, Any]:
             inserted_rows_schema[name] = {
                 "type": "string",
                 "enum": column.enum_values,
-                "description": f"The value for the {name} column in the inserted row. Make sure that the value is one of the enum values for the column and is a STRING."
+                "description": f"The value for the {name} column in the inserted row. Make sure that the value is one of the enum values for the column and is a STRING.",
             }
         elif data_type == DataType.DATE:
             # Date objects are not JSON serialisable across API requests so this is the best alternative
             inserted_rows_schema[name] = {
                 "type": "string",
-                "description": f"The value for the {name} column in the inserted row. Make sure that the value is in the format of YYYY-MM-DD."
+                "description": f"The value for the {name} column in the inserted row. Make sure that the value is in the format of YYYY-MM-DD.",
             }
         elif data_type == DataType.DATETIME:
             # Datetime objects are not JSON serialisable across API requests so this is the best alternative
             inserted_rows_schema[name] = {
                 "type": "string",
-                "description": f"The value for the {name} column in the inserted row. Make sure that the value is in the format of YYYY-MM-DDTHH:MM:SSZ."
+                "description": f"The value for the {name} column in the inserted row. Make sure that the value is in the format of YYYY-MM-DDTHH:MM:SSZ.",
             }
         elif data_type == DataType.FLOAT:
             # Floats are called numbers in OpenAI function calling schema
             inserted_rows_schema[name] = {
                 "type": "number",
-                "description": f"The value for the {name} column in the inserted row."
+                "description": f"The value for the {name} column in the inserted row.",
             }
         else:
             # The rest of the data types do not need special mapping
             inserted_rows_schema[name] = {
                 "type": data_type,
-                "description": f"The value for the {name} column in the inserted row."
+                "description": f"The value for the {name} column in the inserted row.",
             }
-    
+
     return inserted_rows_schema

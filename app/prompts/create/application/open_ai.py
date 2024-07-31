@@ -18,9 +18,9 @@ Do not include the following columns in your response:
 2. Created_at or updated_at columns. For these special columns, you just need to indicate whether they are required or not.
 """
 
+
 def generate_openai_application_user_message(
-    message: str, 
-    chat_history: list[CreateMessage]
+    message: str, chat_history: list[CreateMessage]
 ) -> str:
     return f"""### Here is the chat history:
 
