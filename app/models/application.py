@@ -20,7 +20,6 @@ class ForeignKey(BaseModel):
     table: str
     column: str
 
-
 class Column(BaseModel):
     name: str
     data_type: DataType
