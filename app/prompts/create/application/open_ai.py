@@ -12,7 +12,8 @@ Follow the routine below:
 
 Take note of the following constraints:
 1. If a column's data type is an enum, you must set a default value for that column that belongs to the enum values.
-2. You MUST use one of the tools provided.
+2. If you decide to use a foreign key, make sure to create the target table which is referenced as well.
+3. You MUST use one of the tools provided.
 
 Do not include the following columns in your response:
 1. Primary key column. For this special column, you just need to indicate the primary key type.
